@@ -1,0 +1,10 @@
+if (typeof typeaheadResult !== "undefined") {
+  typeaheadResult({
+    "Q": "tv",
+    "R": [
+      ["tv", [
+        ["Electronics", 3944]
+      ]], "tv stand", "tv wall mount", "tv stands for flat tv 40-55'", "tv mount", "tv antenna", "tv stand with mount", "tvs on clearance"
+    ]
+  })
+}

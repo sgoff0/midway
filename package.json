@@ -1,0 +1,100 @@
+{
+  "name": "testarmada-midway",
+  "version": "1.0.0",
+  "description": "Mocking server",
+  "author": "Himanshu Jain",
+  "keywords": [
+    "test",
+    "stub",
+    "mock",
+    "double",
+    "smtpe",
+    "mail",
+    "http",
+    "https",
+    "tcp",
+    "net",
+    "service virtualization",
+    "mocking",
+    "midway",
+    "API Stubbing"
+  ],
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:TestArmada/midway.git"
+  },
+  "scripts": {
+    "test-only": "istanbul cover _mocha -- --recursive -t 10000",
+    "test": "eslint . --ext .js && istanbul cover _mocha -- --recursive -t 10000",
+    "lint": "eslint . --ext .js",
+    "start-mock": "node ./resources/run-mock-server-console.js",
+    "release": "standard-version"
+  },
+  "dependencies": {
+    "testarmada-midway-logger": "1.0.1",
+    "testarmada-midway-smocks": "1.0.1",
+    "testarmada-midway-util": "1.0.1",
+    "async": "^1.1.0",
+    "babel-core": "^6.14.0",
+    "bluebird": "^3.4.1",
+    "git-url-parse": "^7.0.0",
+    "hapi": "^16.1.0",
+    "hapi-swagger": "^7.7.1",
+    "http-proxy": "^1.16.2",
+    "http-proxy-agent": "^1.0.0",
+    "inert": "^4.1.0",
+    "is-valid-path": "^0.1.1",
+    "lodash.assign": "^4.2.0",
+    "lodash.includes": "^4.3.0",
+    "lodash.isempty": "^4.4.0",
+    "lodash.split": "^4.4.2",
+    "mime-types": "^2.1.10",
+    "mkdirp": "^0.5.1",
+    "pem": "^1.9.4",
+    "request": "^2.81.0",
+    "request-promise": "^4.2.1",
+    "simple-git": "^1.73.0",
+    "tree-kill": "^1.1.0",
+    "vision": "^4.1.1",
+    "yargs": "^4.7.0"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "decache": "^4.1.0",
+    "eslint": "^1.10.3",
+    "eslint-config-defaults": "^8.0.1",
+    "eslint-plugin-filenames": "^0.2.0",
+    "http-proxy-agent": "^1.0.0",
+    "istanbul": "1.1.0-alpha.1",
+    "mocha": "^3.0.0",
+    "mock-require": "^2.0.2",
+    "proxyquire": "^1.7.11",
+    "sinon": "^1.17.5",
+    "standard-version": "^2.4.0",
+    "superagent": "^3.3.0",
+    "supertest": "^2.0.0"
+  },
+  "bin": {
+    "midway": "./bin/midway.js"
+  },
+  "contributors": [
+    {
+      "name": "Himanshu Jain",
+      "url": "http://github.com/hjain60"
+    },
+    {
+      "name": "Pranav Parikh",
+      "url": "http://github.com/pranavparikh"
+    },
+    {
+      "name": "Daniel Kleveros",
+      "url": "http://github.com/dankle"
+    },
+    {
+      "name": "Abha Gupta",
+      "url": "http://github.com/abhagupta"
+    }
+  ],
+  "license": "MIT"
+}

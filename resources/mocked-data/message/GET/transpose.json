@@ -1,0 +1,10 @@
+{
+  "collection": {
+    "sectionOne": {
+      "type": "message",
+      "newData": "test",
+      "minRequired": 0,
+      "stepNumber": 0
+    }
+  }
+}

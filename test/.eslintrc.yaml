@@ -1,0 +1,25 @@
+---
+extends:
+  - "../node_modules/testarmada-midway-util/eslint-config/.eslintrc-test"
+rules:
+  "quotes": [2, "single"]
+  "new-cap": 0
+  "strict": 0
+  "no-shadow": 0
+  "no-undef": 0
+  "prefer-arrow-callback": 0
+  "no-console": 0
+  "no-var": 0
+  "prefer-template": 0
+  "no-magic-numbers": 0
+  "eqeqeq": 0
+  "no-use-before-define": 0
+  "max-params": 0
+  "max-len": 0
+  "max-nested-callbacks": 0
+  "no-catch-shadow": 0
+  "max-depth": 0
+  "no-redeclare": 0
+  "max-statements": 0
+  "new-cap": 0
+  "no-lonely-if": 0
