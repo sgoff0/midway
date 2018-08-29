@@ -1,8 +1,9 @@
 {
   "name": "testarmada-midway",
-  "version": "1.0.0",
-  "description": "Mocking server",
+  "version": "1.0.2",
+  "description": "Mocking server to create reliable test data for test execution and development",
   "author": "Himanshu Jain",
+  "homepage": "http://testarmada.io/documentation/Mocking/rWeb/JAVASCRIPT/Introduction",
   "keywords": [
     "test",
     "stub",
