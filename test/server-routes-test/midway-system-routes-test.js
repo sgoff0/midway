@@ -10,12 +10,16 @@
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *
 */
-var MidwayServer = require('../../resources/run-mock-server-api-dynamic.js');
+var Logger = require('testarmada-midway-logger');
+var Nock = require('nock');
+var RequestPromise = require('request-promise');
 var Expect = require('chai').expect;
+
+var MidwayServer = require('../../resources/run-mock-server-api-dynamic.js');
 var midway = require('../../lib/index');
 var Constants = require('../../lib/constants');
+
 var servers = MidwayServer.getServers();
-var Logger = require('testarmada-midway-logger');
 
 servers.forEach(function (server) {
   describe('midway-system-routes-tests - ' + server.app, function () {
@@ -390,6 +394,74 @@ servers.forEach(function (server) {
         Logger.error(err);
         done();
       }
+    });
+
+    it('check rest API resetAllVariants', function (done) {
+      try {
+        server
+        .get(Constants.MIDWAY_API_PATH + '/resetAllVariants')
+        .expect('Content-type', 'text/html; charset=utf-8')
+        .end(function (err, res) {
+          Expect(err).to.equal(null);
+          Expect(res.status).to.equal(200);
+          Expect(res.text).to.equal('All variants reset to default for session id:default');
+          done();
+        });
+      } catch (err) {
+        Logger.error(err);
+        done();
+      }
+    });
+
+    it('check rest API resetAllVariants with session id', function (done) {
+      try {
+        var sessionId = midway.registerSession();
+        server
+        .get(Constants.MIDWAY_API_PATH + '/resetAllVariants/' + sessionId)
+        .expect('Content-type', 'text/html; charset=utf-8')
+        .end(function (err, res) {
+          Expect(err).to.equal(null);
+          Expect(res.status).to.equal(200);
+          Expect(res.text).to.equal('All variants reset to default for session id:' + sessionId);
+          closeSession(sessionId, done);
+        });
+      } catch (err) {
+        Logger.error(err);
+        closeSession(sessionId, done);
+      }
+    });
+
+    it('check rest API resetAllVariants error', function (done) {
+      var setVariantOptions = {};
+      setVariantOptions[Constants.VARIANT] = 'variant';
+      setVariantOptions[Constants.FIXTURE] = 'closeSessions';
+
+      midway.setMockVariant(setVariantOptions, function () {
+        if (!Nock.isActive()) {
+          Nock.activate();
+        }
+
+        Nock.enableNetConnect('127.0.0.1:3000/');
+
+        Nock('http://localhost:3000', {allowUnmocked: true})
+        .post('/midway/api/route/closeSessions', {variant: 'default'})
+        .replyWithError('Unable to set variant');
+
+        RequestPromise({
+          method: 'GET',
+          url: 'http://localhost:3000/midway/api/resetAllVariants'
+        }).then(function () {
+          Nock.enableNetConnect();
+          throw new Error('Should not have set the variant');
+        }, function (err) {
+          Nock.enableNetConnect();
+          Expect(err.message).to.equal('500 - "Error: Unable to set variant"');
+          done();
+        })
+        .catch(function (err) {
+          done(err);
+        });
+      });
     });
 
   });
