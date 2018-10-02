@@ -10,11 +10,11 @@
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *
 */
-require('./endpoints');
+var Nock = require('nock');
 var Supertest = require('supertest');
 var Logger = require('testarmada-midway-logger');
-var midway = require('../index');
-var Constants = require('../lib/constants');
+var midway;
+var Constants;
 var Expect = require('chai').expect;
 var httpPort = 3000;
 var httpsPort = 4444;
@@ -23,19 +23,27 @@ var servers = [
   Supertest.agent('http://localhost:3000'),
   Supertest.agent('https://localhost:4444')
 ];
-
+var metricsDBHost = 'http://kairos.server.com';
+var metricsDBApi = '/api/v1/datapoints';
 var mockedDirectory = './resources/mocked-data';
-
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 before(function (done) {
+  Nock(metricsDBHost)
+  .persist()
+  .post('/api/v1/datapoints').reply(200, 'OK');
+
+  require('./endpoints');
+  midway = require('../index');
+  Constants = require('../lib/constants');
+
   Logger.info('Starting Midway Server for test cases');
   that.start({
     host: 'localhost',
     port: httpPort,
     httpsPort: httpsPort,
     mockedDirectory: mockedDirectory,
-    metricsDB: 'http://kairos.server.com/api/v1/datapoints',
+    metricsDB: metricsDBHost + metricsDBApi,
     sessions: 5,
     collectMetrics: true
   }, function (server) {
@@ -46,6 +54,7 @@ before(function (done) {
 
 after(function (done) {
   Logger.info('Stopping Midway Server for test cases');
+  Nock.restore();
   midway.resetURLCount();
   midway.resetMockId();
   midway.enableMetrics(false);

@@ -26,8 +26,8 @@
     "url": "git@github.com:TestArmada/midway.git"
   },
   "scripts": {
-    "test-only": "istanbul cover _mocha -- --recursive -t 10000",
-    "test": "eslint . --ext .js && istanbul cover _mocha -- --recursive -t 10000",
+    "test-only": "node test.js",
+    "test": "eslint . --ext .js  && npm run test-only",
     "lint": "eslint . --ext .js",
     "start-mock": "node ./resources/run-mock-server-console.js",
     "release": "standard-version"
@@ -66,11 +66,14 @@
     "eslint": "^1.10.3",
     "eslint-config-defaults": "^8.0.1",
     "eslint-plugin-filenames": "^0.2.0",
+    "glob-promise": "^3.4.0",
     "http-proxy-agent": "^1.0.0",
     "istanbul": "1.1.0-alpha.1",
     "mocha": "^3.0.0",
     "mock-require": "^2.0.2",
+    "nock": "^10.0.0",
     "proxyquire": "^1.7.11",
+    "shelljs": "^0.8.2",
     "sinon": "^1.17.5",
     "standard-version": "^2.4.0",
     "superagent": "^3.3.0",

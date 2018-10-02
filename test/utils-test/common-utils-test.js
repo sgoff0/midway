@@ -14,7 +14,7 @@ var Expect = require('chai').expect;
 var Assert = require('chai').assert;
 var commonUtils = require('../../lib/utils/common-utils');
 var Constants = require('../../lib/constants');
-var server = require('../../resources/run-mock-server-api-dynamic.js');
+require('../../resources/run-mock-server-api-dynamic.js');
 
 describe('common-utils-test', function () {
 
