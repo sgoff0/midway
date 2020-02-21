@@ -33,9 +33,6 @@
     "release": "standard-version"
   },
   "dependencies": {
-    "testarmada-midway-logger": "1.0.1",
-    "testarmada-midway-smocks": "1.0.1",
-    "testarmada-midway-util": "1.0.1",
     "async": "^1.1.0",
     "babel-core": "^6.14.0",
     "bluebird": "^3.4.1",
@@ -56,6 +53,9 @@
     "request": "^2.81.0",
     "request-promise": "^4.2.1",
     "simple-git": "^1.73.0",
+    "testarmada-midway-logger": "1.0.1",
+    "testarmada-midway-smocks": "git+https://github.com/CaribouBot/midway-smocks.git#variantHeader",
+    "testarmada-midway-util": "1.0.1",
     "tree-kill": "^1.1.0",
     "vision": "^4.1.1",
     "yargs": "^4.7.0"
