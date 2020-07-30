@@ -54,7 +54,7 @@
     "request-promise": "^4.2.1",
     "simple-git": "^1.73.0",
     "testarmada-midway-logger": "1.0.1",
-    "testarmada-midway-smocks": "git+https://github.com/CaribouBot/midway-smocks.git#variantHeader",
+    "testarmada-midway-smocks": "git+https://github.com/sgoff0/midway-smocks.git#sgoff0/2020/07-29/sessionVariantHeader",
     "testarmada-midway-util": "1.0.1",
     "tree-kill": "^1.1.0",
     "vision": "^4.1.1",
