@@ -1,0 +1,2 @@
+// require('./portal');
+import './portal';
