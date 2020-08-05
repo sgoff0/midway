@@ -30,7 +30,9 @@
     "test": "eslint . --ext .js && istanbul cover _mocha -- --recursive -t 10000",
     "lint": "eslint . --ext .js",
     "start-mock": "node ./resources/run-mock-server-console.js",
-    "release": "standard-version"
+    "start-mock-caribou": "node --inspect  ./resources/run-mock-server-console-caribou.js",
+    "release": "standard-version",
+    "link-smocks": "npm link ../midway-smocks"
   },
   "dependencies": {
     "async": "^1.1.0",
@@ -54,7 +56,7 @@
     "request-promise": "^4.2.1",
     "simple-git": "^1.73.0",
     "testarmada-midway-logger": "1.0.1",
-    "testarmada-midway-smocks": "git+https://github.com/sgoff0/midway-smocks.git#sgoff0/2020/07-29/sessionVariantHeader",
+    "testarmada-midway-smocks": "git+https://github.discoverfinancial.com/sgoff0/midway-smocks.git#sgoff0/2020/07-29/sessionVariantHeader",
     "testarmada-midway-util": "1.0.1",
     "tree-kill": "^1.1.0",
     "vision": "^4.1.1",
