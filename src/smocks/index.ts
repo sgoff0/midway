@@ -14,11 +14,11 @@ const _ = require('lodash');
 const Logger = require('testarmada-midway-logger');
 const Route = require('./route-model');
 const Variant = require('./variant-model');
-const Plugin = require('./plugin-model');
+// const Plugin = require('./plugin-model');
 const SessionManager = require('./admin/api/util/session-manager');
 
 class Smocks {
-  private _id: string;
+  public _id: string;
   private _connection;
   private _routes = [];
   private _plugins = [];
@@ -26,30 +26,43 @@ class Smocks {
   private _profiles = {};
   private _actions = {};
   public options = {};
+  public randomId = Math.random();
+
+  public input = undefined;
+  public inputs = undefined;
 
   public state = undefined;
 
+  private static instance: Smocks;
+  private constructor() {
+  }
+  public static getInstance(): Smocks {
+    if (!Smocks.instance) {
+      Smocks.instance = new Smocks();
+    }
+    return Smocks.instance;
+  }
 
   public plugins = {
-    get: function () {
+    get: () => {
       return this._plugins;
     },
 
-    resetInput: function (request) {
+    resetInput: (request) => {
       const state = this.state.routeState(request);
       const pluginState = state._pluginState = {};
-      _.each(this._plugins, function (plugin) {
+      _.each(this._plugins, (plugin) => {
         const input = plugin.input();
         if (input) {
           pluginState[plugin.id()] = {};
           _.each(input, (data: any, id) => {
-            this.smocksInstance.plugins.updateInput(plugin.id(), id, data.defaultValue, request);
+            this.plugins.updateInput(plugin.id(), id, data.defaultValue, request);
           });
         }
       });
     },
 
-    updateInput: function (pluginId, id, value, request) {
+    updateInput: (pluginId, id, value, request) => {
       const input = this.state.routeState(request)._pluginState;
       let pluginInput = input[pluginId];
       if (!pluginInput) {
@@ -59,18 +72,18 @@ class Smocks {
       pluginInput[id] = value;
     },
 
-    getInput: function (request) {
+    getInput: (request) => {
       return this.state.routeState(request)._pluginState;
     },
 
-    getInputValue: function (pluginId, id, request) {
+    getInputValue: (pluginId, id, request) => {
       const input = this.state.routeState(request)._pluginState[pluginId];
       return input && input[id];
     }
   };
 
   public routes = {
-    get: function (id) {
+    get: (id?) => {
       if (!id) {
         return this._routes;
       }
@@ -83,19 +96,19 @@ class Smocks {
   }
 
   public variants = {
-    get: function (id) {
+    get: (id) => {
       if (!id) {
-        return _.map(this._variants, function (variant) { return variant; });
+        return _.map(this._variants, (variant) => { return variant; });
       }
       return this._variants[id];
     }
   }
 
   public actions = {
-    get: function () {
+    get: () => {
       return this._actions;
     },
-    execute: function (id, input, request) {
+    execute: (id, input, request) => {
       const action = this._actions[id];
       if (!action) {
         return false;
@@ -107,14 +120,14 @@ class Smocks {
   }
 
   public profiles = {
-    applyProfile: function (profile, request) {
+    applyProfile: (profile, request) => {
       if (_.isString(profile)) {
         profile = this._profiles[profile];
       }
       if (profile) {
         // reset the state first
         this.state.resetRouteState(request);
-        _.each(this._routes, function (route) {
+        _.each(this._routes, (route) => {
           route.applyProfile((route._id && profile[route._id]) || {}, request);
         });
 
@@ -126,7 +139,7 @@ class Smocks {
       }
     },
 
-    get: function (id) {
+    get: (id) => {
       if (!id) {
         return this._profiles;
       }
@@ -223,7 +236,7 @@ class Smocks {
     if (profile) {
       // reset the state first
       this.state.resetRouteState(request);
-      _.each(this._routes, function (route) {
+      _.each(this._routes, (route) => {
         route.applyProfile((route._id && profile[route._id]) || {}, request);
       });
 
@@ -260,7 +273,7 @@ class Smocks {
 
   public getVariants(id) {
     if (!id) {
-      return _.map(this._variants, function (variant) { return variant; });
+      return _.map(this._variants, (variant) => { return variant; });
     }
     return this._variants[id];
   }
@@ -274,7 +287,7 @@ class Smocks {
   // },
 
   public findRoute(id) {
-    return _.find(this._routes, function (route) {
+    return _.find(this._routes, (route) => {
       return route._id === id;
     });
   }
@@ -301,7 +314,7 @@ class Smocks {
 
   public _sanityCheckRoutes() {
     const routeIndex = {};
-    _.each(this._routes, function (route) {
+    _.each(this._routes, (route) => {
       let id = route.id();
       if (routeIndex[id]) {
         Logger.error('duplicate route key "' + id + '"');
@@ -312,7 +325,7 @@ class Smocks {
 
       const variants = route.variants();
       const variantIndex = {};
-      _.each(variants, function (variant) {
+      _.each(variants, (variant) => {
         id = variant.id();
         if (variantIndex[id]) {
           Logger.error('duplicate variant key "' + id + '" for route "' + route.id() + '"');
@@ -332,20 +345,20 @@ class Smocks {
     };
 
     return {
-      state: function (id, value) {
+      state: (id, value) => {
         if (value !== undefined) {
           this.state.userState(request, details)[id] = value;
         } else {
           return this.state.userState(request, details)[id];
         }
       },
-      input: function (id) {
+      input: (id) => {
         if (plugin) {
           return this.plugins.getInputValue(plugin.id(), id, request);
         }
         return route && route.getInputValue(id, request);
       },
-      meta: function (id) {
+      meta: (id) => {
         return route && route.getMetaValue(id);
       },
       route: route,
@@ -638,9 +651,9 @@ const smocksInstance: any = {
 */
 
 
-const smocksInstance2 = new Smocks();
-// console.log('SI: ', smocksInstance.plugins.get);
-// console.log('SI2: ', smocksInstance2.plugins);
-// export default new Smocks();
+
 // export default smocksInstance;
-export default smocksInstance2;
+
+// Both of these seem to have worked fine
+// export default new Smocks();
+export default Smocks.getInstance();

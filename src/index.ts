@@ -90,9 +90,9 @@ const midwayInstance = {
     RoutesManager.addGlobalVariant(globalVariants, userRoutes, data);
   },
 
-  plugin: function (data) {
-    Smocks.plugin(data);
-  },
+  // plugin: function (data) {
+  //   Smocks.plugin(data);
+  // },
 
   getRoute: function (routeId) {
     return Smocks.routes.get(routeId);
