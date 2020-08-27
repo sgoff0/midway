@@ -133,14 +133,14 @@ const smocksInstance: any = {
     }
   },
 
-  plugin: function (data) {
-    const plugin = new Plugin(data, this);
-    if (plugin.plugin) {
-      plugin.plugin(this);
-    }
-    _plugins.push(plugin);
-    return this;
-  },
+  // plugin: function (data) {
+  //   const plugin = new Plugin(data, this);
+  //   if (plugin.plugin) {
+  //     plugin.plugin(this);
+  //   }
+  //   _plugins.push(plugin);
+  //   return this;
+  // },
 
   plugins: {
     get: function () {

@@ -352,6 +352,10 @@ _.extend(Route.prototype, {
   },
 
   selectVariantInput: function (selectedInput, variant, request) {
+    const routeState = this._mocker.state.routeState(request);
+    const id = this.id();
+    const routeStateForId = routeState[id];
+    const variantInput = routeStateForId?._variantInput;
     const input = this._mocker.state.routeState(request)[this.id()];
     input._variantInput[variant.id()] = selectedInput;
   },
