@@ -23,3 +23,5 @@ node_modules
 #routes.json
 resources/routes.json
 coverage
+
+dist
