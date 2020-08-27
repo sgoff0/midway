@@ -1,5 +1,6 @@
 // require("./endpoints");
-require("./caribou-mocked-data");
+// require("./caribou-mocked-data");
+require("./upgrade-mocked-data");
 
 const midway = require("../index");
 // import midway from '../src/index';
@@ -20,7 +21,8 @@ function timeout(ms) {
 }
 
 async function main() {
-  const mockedDirectory = path.join(resourcesPath, 'caribou-mocked-data');
+  // const mockedDirectory = path.join(resourcesPath, 'caribou-mocked-data');
+  const mockedDirectory = path.join(resourcesPath, 'upgrade-mocked-data');
   const server = await midway.start({
     port: 8000,
     httpsPort: 4444,

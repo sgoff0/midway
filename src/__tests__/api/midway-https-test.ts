@@ -10,7 +10,8 @@ describe('Midway Server', function () {
     let myServer;
     let request: SuperTestRequest.SuperTest<SuperTestRequest.Test>;
     beforeEach((done) => {
-        const mockedDirectory = path.join(resourcesPath, 'caribou-mocked-data');
+        // const mockedDirectory = path.join(resourcesPath, 'caribou-mocked-data');
+        const mockedDirectory = path.join(resourcesPath, 'upgrade-mocked-data');
         // Call this to import all routes
         require(mockedDirectory);
         midway.start({
