@@ -13,5 +13,5 @@
 // TODO sgoff0 make sure to update references
 // global.appRoot = Path.resolve(__dirname);
 // module.exports = require('./lib');
-module.exports = require('./src');
+// module.exports = require('./src');
 // module.exports = require('./dist');

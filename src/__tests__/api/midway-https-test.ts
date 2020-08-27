@@ -1,4 +1,4 @@
-const midway = require('../../index');
+import midway from '../../index';
 import * as SuperTestRequest from 'supertest';
 import * as path from 'path';
 import { appRoot, resourcesPath } from '../../utils/pathHelpers';

@@ -1,4 +1,4 @@
-var midway = require("../../../index");
+import midway from '../../../index';
 
 midway.route({
   id: "GET /portal",
@@ -44,48 +44,6 @@ midway
     },
   })
   .variant({
-    id: "instant-credit-successful-login",
-    label: "instant-credit-successful-login",
-    handler(req, reply) {
-      midway.util.respondWithFile(this, reply, { code: 200 });
-    },
-  })
-  .variant({
-    id: "instant-credit-android-not-allowed",
-    label: "instant-credit-android-not-allowed",
-    handler(req, reply) {
-      midway.util.respondWithFile(this, reply, { code: 403 });
-    },
-  })
-  .variant({
-    id: "instant-credit-auth-prohibited",
-    label: "instant-credit-auth-prohibited",
-    handler(req, reply) {
-      midway.util.respondWithFile(this, reply, { code: 403 });
-    },
-  })
-  .variant({
-    id: "instant-credit-upgrade-required",
-    label: "instant-credit-upgrade-required",
-    handler(req, reply) {
-      midway.util.respondWithFile(this, reply, { code: 403 });
-    },
-  })
-  .variant({
-    id: "Non-SSO",
-    label: "Non-SSO",
-    handler(req, reply) {
-      midway.util.respondWithFile(this, reply, { code: 200 });
-    },
-  })
-  .variant({
-    id: "itp-only",
-    label: "itp-only",
-    handler(req, reply) {
-      midway.util.respondWithFile(this, reply, { code: 200 });
-    },
-  })
-  .variant({
     id: "Bank-OOB",
     label: "Bank-OOB",
     handler(req, reply) {
@@ -95,20 +53,6 @@ midway
           "WWW-Authenticate": 'BankSA realm="mapi.discoverbank.com"',
         },
       });
-    },
-  })
-  .variant({
-    id: "multicard",
-    label: "multicard",
-    handler(req, reply) {
-      midway.util.respondWithFile(this, reply, { code: 200 });
-    },
-  })
-  .variant({
-    id: "merge-eligible",
-    label: "merge-eligible",
-    handler(req, reply) {
-      midway.util.respondWithFile(this, reply, { code: 200 });
     },
   });
 // -- plop POST variant hook --
