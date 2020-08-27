@@ -1,5 +1,5 @@
 const midway = require('../../index');
-import * as SuperTestRequest from "supertest";
+import * as SuperTestRequest from 'supertest';
 import * as path from 'path';
 import { appRoot, resourcesPath } from '../../utils/pathHelpers';
 import * as util from 'util';
@@ -10,20 +10,22 @@ describe('Midway Server', function () {
     let myServer;
     let request: SuperTestRequest.SuperTest<SuperTestRequest.Test>;
     beforeEach((done) => {
-        // const mockedDirectory = path.join(resourcesPath, 'caribou-mocked-data');
         const mockedDirectory = path.join(resourcesPath, 'upgrade-mocked-data');
         // Call this to import all routes
         require(mockedDirectory);
-        midway.start({
-            port: 3000,
-            // httpsPort: 4444,
-            mockedDirectory,
-            // sessions: 2,
-        }, server => {
-            myServer = server;
-            request = SuperTestRequest('http://localhost:3000');
-            done();
-        });
+        midway.start(
+            {
+                port: 3000,
+                // httpsPort: 4444,
+                mockedDirectory,
+                // sessions: 2,
+            },
+            (server) => {
+                myServer = server;
+                request = SuperTestRequest('http://localhost:3000');
+                done();
+            },
+        );
     });
     afterEach(() => {
         midway.stop(myServer);
@@ -45,18 +47,18 @@ describe('Midway Server', function () {
         await setMockVariant({
             mockPort: 3000,
             fixture: 'POST /portal',
-            variant: 'Bank-OOB'
+            variant: 'Bank-OOB',
         });
         const result2 = await request.post('/portal');
         expect(result2.status).toBe(401);
     });
-    it('should read 240 routes for use in admin interface', async () => {
+    it('should read 16 routes for use in admin interface', async () => {
         const result = await request.get('/midway-data');
         // True while test data doesn't changae
-        expect(result.body.routes).toHaveLength(240);
+        expect(result.body.routes).toHaveLength(16);
     });
     it('should read desired response body from endpoint', async () => {
         const result = await request.get('/portal');
-        expect(result.body.cardAccounts).toHaveLength(1);
+        expect(result.body.accounts).toHaveLength(1);
     });
 });
