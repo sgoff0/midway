@@ -22,7 +22,6 @@ const Hapi = require('hapi');
 import MidwayServerRoutes from './server-routes/midway-routes-manager';
 import MidwayPluginController from './utils/midway-plugin-controller';
 import MetricsManager from './utils/metrics-manager';
-import GenerateCertManager from './utils/generate-certificate-manager';
 import * as Logger from 'testarmada-midway-logger';
 import { argv as Argv } from './utils/configuration-parameters';
 import Constants from './constants';
@@ -123,16 +122,8 @@ internals.addServerRoutesAndSessions = function (midwayOptions, server) {
 
 function createHapiServer(midwayOptions, callback) {
   const server = new Hapi.Server();
-  if (midwayOptions.httpsPort) {
-    GenerateCertManager.genCerts(midwayOptions.resolvedPath, function (err, tls) {
-      server.connection({ port: midwayOptions.port, labels: 'http' });
-      server.connection({ port: midwayOptions.httpsPort, labels: 'https', tls: tls });
-      return callback(server);
-    });
-  } else {
-    server.connection({ port: midwayOptions.port, labels: 'http' });
-    return callback(server);
-  }
+  server.connection({ port: midwayOptions.port, labels: 'http' });
+  return callback(server);
 }
 
 
