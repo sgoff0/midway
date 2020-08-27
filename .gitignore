@@ -25,3 +25,4 @@ resources/routes.json
 coverage
 
 dist
+resources/caribou-mocked-data/
