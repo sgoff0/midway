@@ -19,6 +19,203 @@ const globalVariants = [];
 //TODO THIS Require IS A HACK FOR HAPI CORS HEADERS AND SHOULD BE REMOVED ONCE FIXED BY HAPI
 import CorsHeadersHack from './utils/cors-headers-hack';
 
+
+class Midway {
+
+  public server;
+
+  public profile = Smocks.profile;
+
+  public util = Utils;
+  public log = Logger;
+
+  private static instance: Midway;
+  private constructor() {
+  }
+  public static getInstance(): Midway {
+    if (!Midway.instance) {
+      Midway.instance = new Midway();
+    }
+    return Midway.instance;
+  }
+
+  public id = (id) => {
+
+    if (!id || Smocks._id) {
+      return Smocks._id;
+    }
+    Smocks._id = id;
+    return Smocks;
+  }
+
+  public start = (options, callback) => {
+    Logger.debug('***************Starting Midway mocking server ***************');
+    const midwayOptions = options || {};
+
+    RepoUtil.handleMultipleRepos(midwayOptions).then(() => {
+      midwayOptions.userRoutes = userRoutes;
+
+      MidwayServer.start(midwayOptions, (server) => {
+        this.server = server;
+        if (callback) {
+          return callback(this.server);
+        }
+      });
+    }).catch((err) => {
+      if (callback) {
+        return callback(err);
+      }
+    });
+  }
+
+  public stop = (server, callback?) => {
+    Logger.debug('***************Stopping Midway mocking server ***************');
+    const serverToStop = server || this.server;
+    MidwayServer.stop(serverToStop, callback);
+  }
+
+  public toPlugin = (hapiPluginOptions, options) => {
+    const smocksOptions = options || {};
+    smocksOptions.userRoutes = userRoutes;
+    return Plugin.toPlugin(hapiPluginOptions, smocksOptions);
+  }
+
+  public route = (data) => {
+    Logger.debug('Routes.....');
+    Logger.debug(JSON.stringify(data, null, 2));
+
+    //TODO THE FOLLOWING CALL IS A HACK FOR HAPI CORS HEADERS AND SHOULD BE REMOVED ONCE FIXED BY HAPI
+    CorsHeadersHack.setCorsHeaders(data);
+
+    const smockRouteObject = Smocks.route(data);
+
+    if (RepoUtil.getMultiRepoDirectory()) {
+      smockRouteObject.mockedDirectory = Constants.MULTI_REPOS_PATH + RepoUtil.getMultiRepoDirectory();
+    }
+
+    RoutesManager.addGlobalVariantForSingleRoute(globalVariants, smockRouteObject);
+
+    if (!Utils.isServerRunning()) {
+      const userRouteData = { 'routeObject': smockRouteObject, 'routeData': data };
+      userRoutes.push(userRouteData);
+    }
+
+    return smockRouteObject;
+  }
+
+  public addGlobalVariant = (data) => {
+    RoutesManager.addGlobalVariant(globalVariants, userRoutes, data);
+  }
+
+  // public plugin = (data) =>  {
+  //   Smocks.plugin(data);
+  // }
+
+  public getRoute = (routeId) => {
+    return Smocks.routes.get(routeId);
+  }
+
+  public setMockId = (mockId, sessionId) => {
+    return Utils.setMockId(mockId, sessionId);
+  }
+
+  public getMockId = (sessionId) => {
+    return Utils.getMockId(sessionId);
+  }
+
+  public resetMockId = (sessionId) => {
+    return Utils.resetMockId(sessionId);
+  }
+
+  public resetMockVariantWithSession = (options, callback) => {
+    Utils.resetMockVariantWithSession(options, (err, result) => {
+      if (err) {
+        return callback(err);
+      }
+      return callback(null, result);
+    });
+  }
+
+  public setMockVariantWithSession = (options, callback) => {
+    Utils.setMockVariantWithSession(options, (err, result) => {
+      if (err) {
+        return callback(err);
+      }
+      return callback(null, result);
+    });
+  }
+
+  public setMockVariant = (options, callback) => {
+    if (!options.mockPort) {
+      options.mockPort = this.getPortInfo().httpPort;
+    }
+    Utils.setMockVariant(options, (err, result) => {
+      if (err) {
+        return callback(err);
+      }
+      return callback(null, result);
+    });
+  }
+
+  public resetURLCount = (sessionId) => {
+    return Utils.resetURLCount(sessionId);
+  }
+
+  public getURLCount = (sessionId) => {
+    return Utils.getURLCount(sessionId);
+  }
+
+  public checkSession = (sessionId) => {
+    return SessionManager.checkSession(sessionId);
+  }
+
+  public getSessions = () => {
+    return SessionInfo.getSessions();
+  }
+
+  public registerSession = () => {
+    return SessionManager.registerSession();
+  }
+
+  public closeSession = (sessionId, callback) => {
+    return SessionManager.closeSession(sessionId, callback);
+  }
+
+  public clearSessions = () => {
+    SessionManager.clearSessions();
+  }
+
+  public getProjectName = () => {
+    return Utils.getProjectName();
+  }
+
+  public getPortInfo: any = () => {
+    return Utils.getPortInfo();
+  }
+
+  public addState = (route, stateKey, stateValue) => {
+    StateManager.addState(route, stateKey, stateValue);
+  }
+
+  public getState = (route, stateKey) => {
+    return StateManager.getState(route, stateKey);
+  }
+
+  public clearState = (sessionId) => {
+    StateManager.clearState(sessionId);
+  }
+
+  public enableMetrics = (collectMetrics) => {
+    MetricManager.enableMetrics(collectMetrics);
+  }
+
+  public isMetricsEnabled = () => {
+    return MetricManager.isMetricsEnabled();
+  }
+
+}
+
+/*
 const midwayInstance = {
 
   id: function (id) {
@@ -201,7 +398,10 @@ const midwayInstance = {
   util: Utils,
   log: Logger
 };
+*/
 
-export default midwayInstance;
+// export default midwayInstance;
 // To support js require without having to add .default
-module.exports = midwayInstance;
+// module.exports = midwayInstance;
+module.exports = Midway.getInstance();
+export default Midway.getInstance();
