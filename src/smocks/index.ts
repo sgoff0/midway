@@ -26,7 +26,6 @@ class Smocks {
   private _profiles = {};
   private _actions = {};
   public options = {};
-  public randomId = Math.random();
 
   public input = undefined;
   public inputs = undefined;

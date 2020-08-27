@@ -50,7 +50,6 @@ export default {
       // deprecate smocks.initOptions in favor of smocks.options
       smocks.initOptions = smocks.options = smocksOptions;
       console.log(".toPlugin Setting smocksOptions.state to smocks", smocksOptions.state);
-      console.log("RandomId: ", smocks.randomId);
       smocks.state = smocksOptions.state;
 
       if (hapiPluginOptions.onRegister) {
