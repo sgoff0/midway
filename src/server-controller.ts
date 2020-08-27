@@ -21,7 +21,6 @@ import responseHandler from './route-handlers/response-handler';
 const Hapi = require('hapi');
 import MidwayServerRoutes from './server-routes/midway-routes-manager';
 import MidwayPluginController from './utils/midway-plugin-controller';
-import MetricsManager from './utils/metrics-manager';
 import * as Logger from 'testarmada-midway-logger';
 import { argv as Argv } from './utils/configuration-parameters';
 import Constants from './constants';
@@ -51,14 +50,6 @@ internals.start = function (startOptions, callback) {
 
   if (midwayOptions.collectMetrics === undefined) {
     midwayOptions.collectMetrics = true;
-  }
-
-  // Set kairosdb url if passed in midway options and metrics is true
-  if (midwayOptions.collectMetrics === true && midwayOptions[Constants.KAIROS_DB_URL]) {
-    MidwayUtils.setKairosDbUrl(midwayOptions[Constants.KAIROS_DB_URL]);
-
-    // Enable only if the metrics db url is passed in MidwayOptions ('metricsDB')
-    MetricsManager.enableMetrics(midwayOptions.collectMetrics);
   }
 
   Logger.info('Starting midway server on http at http://' + midwayOptions.host + ':' + midwayOptions.port + '/midway');

@@ -7,7 +7,6 @@ import SessionManager from './session-manager/session-manager';
 import StateManager from './state-manager/state-manager';
 import RoutesManager from './server-routes/midway-routes-manager';
 import SessionInfo from './session-manager/session-info';
-import MetricManager from './utils/metrics-manager';
 import RepoUtil from './multiGitRepo/repo-util';
 import Constants from './constants';
 import Smocks from './smocks/index';
@@ -196,14 +195,6 @@ class Midway {
 
   public clearState = (sessionId) => {
     StateManager.clearState(sessionId);
-  }
-
-  public enableMetrics = (collectMetrics) => {
-    MetricManager.enableMetrics(collectMetrics);
-  }
-
-  public isMetricsEnabled = () => {
-    return MetricManager.isMetricsEnabled();
   }
 
 }

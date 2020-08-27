@@ -13,23 +13,9 @@
 // make this file a module
 import * as Logger from 'testarmada-midway-logger';
 import Constants from '../constants';
-import MetricManager from './../utils/metrics-manager';
-import Utils from '../utils/common-utils';
 
 const ResponseHandler = function (request, reply) {
   setMockedResponseHeader(request);
-
-  //TODO THIS API CALL IS A HACK FOR HAPI CORS HEADERS AND SHOULD BE REMOVED ONCE FIXED BY HAPI
-  // setHAPICorsHeadersHack(request);
-
-  const collectMetrics = MetricManager.isMetricsEnabled();
-  if (collectMetrics) {
-    const metrics = MetricManager.getMetrics(request, Utils.getProjectName());
-    if (metrics) {
-      MetricManager.postToKairos(metrics);
-    }
-  }
-
   return reply.continue();
 };
 
