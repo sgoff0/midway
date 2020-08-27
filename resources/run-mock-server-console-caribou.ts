@@ -20,9 +20,9 @@ async function main() {
   const mockedDirectory = path.join(resourcesPath, 'upgrade-mocked-data');
   midway.start({
     port: 8000,
-    httpsPort: 4444,
+    // httpsPort: 4444,
     mockedDirectory,
-    sessions: 2,
+    // sessions: 2,
   });
 
   // midway.addStte()
@@ -30,14 +30,14 @@ async function main() {
 
   // await timeout(10000);
 
-  await setMockVariantWithSession({
-    hostName: 'localhost:8000',
-    useHttp: true,
-    fixtureToVariantMapping: {
-      'GET /cardsvcs/acs/stmt/v1/statements': 'withoutStatements',
-    },
-    midwaySessionId: 0,
-  });
+  // await setMockVariantWithSession({
+  //   hostName: 'localhost:8000',
+  //   useHttp: true,
+  //   fixtureToVariantMapping: {
+  //     'GET /cardsvcs/acs/stmt/v1/statements': 'withoutStatements',
+  //   },
+  //   midwaySessionId: 0,
+  // });
   // console.log("Result: ", result);
 
   // midway.setMockVariantWithSession(

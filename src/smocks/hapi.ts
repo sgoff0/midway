@@ -49,6 +49,7 @@ export default {
       smocksOptions = smocks._sanitizeOptions(smocksOptions);
       // deprecate smocks.initOptions in favor of smocks.options
       smocks.initOptions = smocks.options = smocksOptions;
+      console.log(".toPlugin Setting smocksOptions.state to smocks", smocksOptions.state);
       smocks.state = smocksOptions.state;
 
       if (hapiPluginOptions.onRegister) {
@@ -72,6 +73,7 @@ export default {
       hapiConnectionOptions = hapiOptions;
     }
     smocksOptions = smocks._sanitizeOptions(smocksOptions || {});
+    console.log(".start Setting smocksOptions.state to smocks", smocksOptions.state);
     smocks.state = smocksOptions.state;
     smocks.initOptions = smocksOptions;
     smocks._sanityCheckRoutes();
