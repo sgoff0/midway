@@ -12,16 +12,16 @@
 */
 import * as _ from 'lodash';
 
-function formatData(mocker, request) {
+function formatData(smocks, request) {
   return {
-    id: mocker.id(),
-    routes: formatRoutes(mocker, request),
-    globalInput: formatPluginInput(mocker),
-    globalInputValues: mocker.plugins.getInput(request),
-    profiles: formatProfiles(mocker),
-    actions: formatActions(mocker.actions.get()),
-    proxies: mocker.initOptions && mocker.initOptions.proxy && _.map(mocker.initOptions.proxy, function (value, key) { return key; }),
-    selectedProxy: mocker.state.routeState(request).__proxy
+    id: smocks.id(),
+    routes: formatRoutes(smocks, request),
+    globalInput: formatPluginInput(smocks),
+    globalInputValues: smocks.plugins.getInput(request),
+    profiles: formatProfiles(smocks),
+    actions: formatActions(smocks.actions.get()),
+    proxies: smocks.initOptions && smocks.initOptions.proxy && _.map(smocks.initOptions.proxy, function (value, key) { return key; }),
+    selectedProxy: smocks.state.routeState(request).__proxy
   };
 }
 
@@ -80,16 +80,18 @@ function formatSelections(route, request) {
     }
   });
   const rtn: any = {};
-  const input = route.selectedRouteInput(request);
-  if (!isEmptyObject(input)) {
-    rtn.route = input;
-  }
-  if (!isEmptyObject(variantSelections)) {
-    rtn.variants = variantSelections;
-  }
-  if (!isEmptyObject(rtn)) {
-    return rtn;
-  }
+  console.warn("TODO sgoff0 revert me around formatting data");
+  return rtn;
+  // const input = route.selectedRouteInput(request);
+  // if (!isEmptyObject(input)) {
+  //   rtn.route = input;
+  // }
+  // if (!isEmptyObject(variantSelections)) {
+  //   rtn.variants = variantSelections;
+  // }
+  // if (!isEmptyObject(rtn)) {
+  //   return rtn;
+  // }
 }
 
 function formatActions(actions) {

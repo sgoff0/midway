@@ -133,19 +133,25 @@ function configServer(server) {
   const _routes = smocks.routes.get();
   const _plugins = smocks.plugins.get();
 
+
+
+  console.log("Before: ", _routes[0]);
   _.each(_routes, function (route) {
     if (route.hasVariants()) {
 
-      let connection = server;
+      // multiple connections gone after v17
+      // let connection = server;
 
-      if (route.connection()) {
-        connection = server.select(route.connection());
-      }
-      connection.route({
+      // if (route.connection()) {
+      //   // TODO sever.select doens't exist anymore
+      //   // connection = server.select(route.connection());
+      //   connection = server;
+      // }
+      server.route({
         method: route.method(),
         path: route.path(),
         config: route.config(),
-        handler: function (request, reply) {
+        handler: function (request, h) {
 
           function doInit() {
             _.each(_routes, function (route) {
@@ -159,7 +165,7 @@ function configServer(server) {
 
           function doExecute() {
             if (smocks.state.onRequest) {
-              smocks.state.onRequest(request, reply);
+              smocks.state.onRequest(request, h);
             }
 
             let pluginIndex = 0;
@@ -172,8 +178,10 @@ function configServer(server) {
                   handlePlugins();
                 }
               } else {
-                reply = wrapReply(request, reply, _plugins);
-                route._handleRequest.call(route, request, reply);
+                // TODO sgoff0 is wrap reply required?
+                console.warn("removed wrap reply");
+                // reply = wrapReply(request, h, _plugins);
+                route._handleRequest.call(route, request, h);
               }
             }
 
@@ -190,6 +198,7 @@ function configServer(server) {
       });
     }
   }, this);
+  console.log("After: ", _routes[0]);
 
   adminApi(server, smocks);
 }

@@ -228,6 +228,7 @@ _.extend(Route.prototype, {
   },
 
   activeVariant: function (request) {
+    console.warn("TODO sgoff0 revert me around active variant");
     const variantFromRequestHeader = request.headers['x-request-variant'];
     const variantFromRouteState = this._mocker.state.routeState(request)[this._id]._activeVariant;
 
@@ -340,6 +341,11 @@ _.extend(Route.prototype, {
   },
 
   selectedVariantInput: function (variant, request) {
+    const routeState = this._mocker.state.routeState(request);
+    const id = this.id();
+    const routeStateForId = routeState[id];
+    const variantInput = routeStateForId?._variantInput;
+    console.warn("TODO sgoff0 revert me around starting variant");
     let input = this._mocker.state.routeState(request)[this.id()]._variantInput;
     if (!input) {
       input = this._mocker.state.routeState(request)[this.id()]._variantInput = {};

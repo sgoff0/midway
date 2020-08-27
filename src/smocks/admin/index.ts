@@ -11,8 +11,10 @@
 *
 */
 import formatData from './api/format-data';
+import * as util from 'util';
+import * as fs from 'fs';
 const MIDWAY_API_PATH = require('../constants').MIDWAY_API_PATH;
-const fs = require('fs');
+// const fs = require('fs');
 const Path = require('path');
 const _ = require('lodash');
 const Logger = require('testarmada-midway-logger');
@@ -24,13 +26,14 @@ const MIME_TYPES = {
   '.otf': 'font/otf',
   '.woff': 'font/woff'
 };
+const readFile = util.promisify(fs.readFile);
 
-export default function (server, mocker) {
+export default (server, smocks) => {
 
   let connection = server;
 
-  if (mocker.connection()) {
-    connection = server.select(mocker.connection());
+  if (smocks.connection()) {
+    connection = server.select(smocks.connection());
   }
 
   connection.route({
@@ -45,23 +48,34 @@ export default function (server, mocker) {
   connection.route({
     method: 'GET',
     path: '/midway',
-    handler: (request, h) => {
-      //   return "test";
+    handler: async (request, h) => {
+      try {
+        const html = await readFile(__dirname + '/config-page.html', { encoding: 'utf8' });
+        // const data = formatData(smocks, request);
+        const data = {};
+        const retVal = html.replace('{data}', JSON.stringify(data));
+        return retVal;
+      } catch (err) {
+        console.error("Err: ", err);
+        return h.code(500);
+      }
+
       // }
       // handler: ensureInitialized(function (request, h) {
       // return "test";
       // h = wrapReply(request, h);
-      fs.readFile(__dirname + '/config-page.html', { encoding: 'utf8' }, function (err, html) {
-        if (err) {
-          Logger.error(err);
-          return h.response(err);
-        } else {
-          const data = formatData(mocker, request);
-          html = html.replace('{data}', JSON.stringify(data));
-          // return h.response(html);
-          return html;
-        }
-      });
+      // fs.readFile(__dirname + '/config-page.html', { encoding: 'utf8' }, function (err, html) {
+      //   if (err) {
+      //     Logger.error(err);
+      //     return h.response(err);
+      //   } else {
+
+      //     const data = formatData(mocker, request);
+      //     html = html.replace('{data}', JSON.stringify(data));
+      //     // return h.response(html);
+      //     return html;
+      //   }
+      // });
     }
   });
 
@@ -75,7 +89,7 @@ export default function (server, mocker) {
           Logger.error(err);
           reply(err);
         } else {
-          const data = formatData(mocker, request);
+          const data = formatData(smocks, request);
           reply(data);
         }
       });
@@ -88,8 +102,8 @@ export default function (server, mocker) {
     handler: ensureInitialized(function (request, reply, respondWithConfig) {
       reply = wrapReply(request, reply);
       const id = request.params.id;
-      const route = mocker.findRoute(id);
-      require('./api/route-update')(route, mocker)(request, reply, respondWithConfig);
+      const route = smocks.findRoute(id);
+      require('./api/route-update')(route, smocks)(request, reply, respondWithConfig);
     })
   });
 
@@ -99,9 +113,9 @@ export default function (server, mocker) {
     handler: ensureInitialized(function (request, reply, respondWithConfig) {
       reply = wrapReply(request, reply);
       const id = request.params.id;
-      const route = mocker.findRoute(id);
+      const route = smocks.findRoute(id);
 
-      require('./api/execute-action')(mocker)(request, reply, respondWithConfig);
+      require('./api/execute-action')(smocks)(request, reply, respondWithConfig);
     })
   });
 
@@ -110,7 +124,7 @@ export default function (server, mocker) {
     path: MIDWAY_API_PATH + '/state/reset',
     handler: ensureInitialized(function (request, reply, respondWithConfig) {
       reply = wrapReply(request, reply);
-      require('./api/reset-state')(mocker)(request, reply, respondWithConfig);
+      require('./api/reset-state')(smocks)(request, reply, respondWithConfig);
     })
   });
 
@@ -119,7 +133,7 @@ export default function (server, mocker) {
     path: MIDWAY_API_PATH + "/sessionVariantState/reset",
     handler: ensureInitialized(function (request, reply, respondWithConfig) {
       reply = wrapReply(request, reply);
-      require("./api/reset-session-variant-state")(mocker)(request, reply, respondWithConfig);
+      require("./api/reset-session-variant-state")(smocks)(request, reply, respondWithConfig);
     })
   });
 
@@ -128,7 +142,7 @@ export default function (server, mocker) {
     path: MIDWAY_API_PATH + "/sessionVariantState/reset/{key}",
     handler: ensureInitialized(function (request, reply, respondWithConfig) {
       reply = wrapReply(request, reply);
-      require("./api/reset-session-variant-state-by-key")(mocker)(request, reply, respondWithConfig);
+      require("./api/reset-session-variant-state-by-key")(smocks)(request, reply, respondWithConfig);
     })
   });
 
@@ -137,7 +151,7 @@ export default function (server, mocker) {
     path: MIDWAY_API_PATH + "/sessionVariantState/set/{key}",
     handler: ensureInitialized(function (request, reply, respondWithConfig) {
       reply = wrapReply(request, reply);
-      require("./api/set-session-variant-state-by-key")(mocker)(request, reply, respondWithConfig);
+      require("./api/set-session-variant-state-by-key")(smocks)(request, reply, respondWithConfig);
     })
   });
 
@@ -147,7 +161,7 @@ export default function (server, mocker) {
     path: MIDWAY_API_PATH + '/input/reset',
     handler: ensureInitialized(function (request, reply, respondWithConfig) {
       reply = wrapReply(request, reply);
-      require('./api/reset-input')(mocker)(request, reply, respondWithConfig);
+      require('./api/reset-input')(smocks)(request, reply, respondWithConfig);
     })
   });
 
@@ -156,7 +170,7 @@ export default function (server, mocker) {
     path: MIDWAY_API_PATH + '/global/input/{pluginId}',
     handler: ensureInitialized(function (request, reply, respondWithConfig) {
       reply = wrapReply(request, reply);
-      require('./api/global-input')(mocker)(request, reply, respondWithConfig);
+      require('./api/global-input')(smocks)(request, reply, respondWithConfig);
     })
   });
 
@@ -165,7 +179,7 @@ export default function (server, mocker) {
     path: MIDWAY_API_PATH + '/profile',
     handler: ensureInitialized(function (request, reply, respondWithConfig) {
       reply = wrapReply(request, reply);
-      require('./api/calculate-profile')(mocker)(request, reply, respondWithConfig);
+      require('./api/calculate-profile')(smocks)(request, reply, respondWithConfig);
     })
   });
 
@@ -174,7 +188,7 @@ export default function (server, mocker) {
     path: MIDWAY_API_PATH + '/profile',
     handler: ensureInitialized(function (request, reply, respondWithConfig) {
       reply = wrapReply(request, reply);
-      require('./api/select-local-profile')(mocker)(request, reply, respondWithConfig);
+      require('./api/select-local-profile')(smocks)(request, reply, respondWithConfig);
     })
   });
 
@@ -183,7 +197,7 @@ export default function (server, mocker) {
     path: MIDWAY_API_PATH + '/profile/{name}',
     handler: ensureInitialized(function (request, reply, respondWithConfig) {
       reply = wrapReply(request, reply);
-      require('./api/select-remote-profile')(mocker)(request, reply, respondWithConfig);
+      require('./api/select-remote-profile')(smocks)(request, reply, respondWithConfig);
     })
   });
 
@@ -192,7 +206,7 @@ export default function (server, mocker) {
     path: MIDWAY_API_PATH + '/profile/{name}',
     handler: ensureInitialized(function (request, reply, respondWithConfig) {
       reply = wrapReply(request, reply);
-      require('./api/select-remote-profile')(mocker)(request, reply, respondWithConfig);
+      require('./api/select-remote-profile')(smocks)(request, reply, respondWithConfig);
     })
   });
 
@@ -201,7 +215,7 @@ export default function (server, mocker) {
     path: MIDWAY_API_PATH + '/proxy',
     handler: ensureInitialized(function (request, reply, respondWithConfig) {
       reply = wrapReply(request, reply);
-      require('./api/set-proxy')(mocker)(request, reply, respondWithConfig);
+      require('./api/set-proxy')(smocks)(request, reply, respondWithConfig);
     })
   });
 
@@ -223,12 +237,13 @@ export default function (server, mocker) {
   connection.route({
     method: 'GET',
     path: '/midway/app.js',
-    handler: function (request, reply) {
+    handler: function (request, h) {
       if (!compiledSource) {
         const source = fs.readFileSync(__dirname + '/config-page.js', { encoding: 'utf-8' });
         compiledSource = require('babel-core').transform(source, { presets: [require('babel-preset-react')] }).code;
       }
-      reply(compiledSource);
+      // reply(compiledSource);
+      return compiledSource;
 
       // when developing config page, uncomment below
       // compiledSource = undefined;
@@ -238,8 +253,9 @@ export default function (server, mocker) {
   connection.route({
     method: 'GET',
     path: '/midway/inputs.js',
-    handler: function (request, reply) {
-      reply(getInputPlugins(mocker));
+    handler: function (request, h) {
+      // reply(getInputPlugins(mocker));
+      return getInputPlugins(smocks);
     }
   });
 
@@ -247,15 +263,15 @@ export default function (server, mocker) {
     return function (request, h) {
 
       function doInit() {
-        _.each(mocker.routes.get(), function (route) {
+        _.each(smocks.routes.get(), function (route) {
           route.resetRouteVariant(request);
           route.resetSelectedInput(request);
         });
-        mocker.plugins.resetInput(request);
-        const initialState = JSON.parse(JSON.stringify(mocker.initOptions.initialState || {}));
-        mocker.state.resetUserState(request, initialState);
+        smocks.plugins.resetInput(request);
+        const initialState = JSON.parse(JSON.stringify(smocks.initOptions.initialState || {}));
+        smocks.state.resetUserState(request, initialState);
       }
-      mocker.state.initialize(request, function (err, performInitialization) {
+      smocks.state.initialize(request, function (err, performInitialization) {
         if (performInitialization) {
           doInit();
         }
@@ -269,8 +285,8 @@ export default function (server, mocker) {
     const rtn = function (payload) {
       const response = h.response(payload);
       // const response = reply.call(this, payload).hold();
-      if (mocker.state.onResponse) {
-        mocker.state.onResponse(request, response);
+      if (smocks.state.onResponse) {
+        smocks.state.onResponse(request, response);
       }
       // return response.send();
       return response;
@@ -280,8 +296,8 @@ export default function (server, mocker) {
       // TODO sgoff0 is h.file a thing?
       console.error("Is h.file a thing?");
       const response = h.file(arguments);
-      if (mocker.state.onResponse) {
-        mocker.state.onResponse(request, response);
+      if (smocks.state.onResponse) {
+        smocks.state.onResponse(request, response);
       }
       // return response.send();
       return response;

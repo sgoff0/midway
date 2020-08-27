@@ -10,33 +10,33 @@
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *
 */
-export { };
-const _ = require('lodash');
+// export { };
+// const _ = require('lodash');
 
-const Plugin = function (data, mocker) {
-  this.onRequest = data.onRequest;
-  this.onResponse = data.onResponse;
-  this.plugin = data.plugin;
-  this._input = data.input;
-  this._id = data.id || _.uniqueId('plugin');
-};
-_.extend(Plugin.prototype, {
+// const Plugin = function (data, mocker) {
+//   this.onRequest = data.onRequest;
+//   this.onResponse = data.onResponse;
+//   this.plugin = data.plugin;
+//   this._input = data.input;
+//   this._id = data.id || _.uniqueId('plugin');
+// };
+// _.extend(Plugin.prototype, {
 
-  id: function () {
-    return this._id;
-  },
+//   id: function () {
+//     return this._id;
+//   },
 
-  input: function () {
-    return this._input;
-  },
+//   input: function () {
+//     return this._input;
+//   },
 
-  selectedInput: function (request) {
-    console.error("Commented out code here around smocksInstance");
-    // TODO sgoff0 where does this instance come from?
-    // const state = smocksInstance.state.userState(request);
-    // const pluginState = state._pluginState = {};
-    // return pluginState[this._id];
-  }
-});
+//   selectedInput: function (request) {
+//     console.error("Commented out code here around smocksInstance");
+//     // TODO sgoff0 where does this instance come from?
+//     // const state = smocksInstance.state.userState(request);
+//     // const pluginState = state._pluginState = {};
+//     // return pluginState[this._id];
+//   }
+// });
 
-module.exports = Plugin;
+// module.exports = Plugin;

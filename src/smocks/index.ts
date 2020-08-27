@@ -14,7 +14,7 @@ const _ = require('lodash');
 const Logger = require('testarmada-midway-logger');
 const Route = require('./route-model');
 const Variant = require('./variant-model');
-const Plugin = require('./plugin-model');
+// const Plugin = require('./plugin-model');
 const SessionManager = require('./admin/api/util/session-manager');
 
 const _routes = [];
@@ -23,7 +23,12 @@ const _variants = {};
 const _profiles = {};
 const _actions = {};
 
-const smocksInstance: any = {
+const smocksInstance = {
+  _id: undefined,
+  _connection: undefined,
+  _executionContext: undefined,
+  state: undefined,
+
   id: function (id) {
     if (!id) {
       return smocksInstance._id;
@@ -133,14 +138,14 @@ const smocksInstance: any = {
     }
   },
 
-  plugin: function (data) {
-    const plugin = new Plugin(data, this);
-    if (plugin.plugin) {
-      plugin.plugin(this);
-    }
-    _plugins.push(plugin);
-    return this;
-  },
+  // plugin: function (data) {
+  //   const plugin = new Plugin(data, this);
+  //   if (plugin.plugin) {
+  //     plugin.plugin(this);
+  //   }
+  //   _plugins.push(plugin);
+  //   return this;
+  // },
 
   plugins: {
     get: function () {
