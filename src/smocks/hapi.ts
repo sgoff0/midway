@@ -27,40 +27,28 @@ const _inputs = {
 };
 
 export default {
-  toPlugin: function (hapiPluginOptions, smocksOptions) {
-    const register: any = function (server, pluginOptions, next) {
-      function _next(err?) {
-        if (err) {
-          next(err);
-        } else {
-          configServer(server);
-          next();
-        }
-      }
+  toPlugin: function (smocksOptions: any = {}) {
+    return {
+      name: 'smocks-plugin',
+      version: '2.0.0',
+      register: function (server, options) {
+        smocks._sanityCheckRoutes();
+        // allow for plugin state override
+        // if (register.overrideState) {
+        //   smocksOptions.state = register.overrideState;
+        // }
+        smocksOptions = smocks._sanitizeOptions(smocksOptions);
+        // deprecate smocks.initOptions in favor of smocks.options
+        smocks.initOptions = smocks.options = smocksOptions;
+        smocks.state = smocksOptions.state;
 
-      hapiPluginOptions = hapiPluginOptions || {};
-      smocksOptions = smocksOptions || {};
-
-      smocks._sanityCheckRoutes();
-      // allow for plugin state override
-      if (register.overrideState) {
-        smocksOptions.state = register.overrideState;
-      }
-      smocksOptions = smocks._sanitizeOptions(smocksOptions);
-      // deprecate smocks.initOptions in favor of smocks.options
-      smocks.initOptions = smocks.options = smocksOptions;
-      smocks.state = smocksOptions.state;
-
-      if (hapiPluginOptions.onRegister) {
-        hapiPluginOptions.onRegister(server, pluginOptions, _next);
-      } else {
-        _next();
+        configServer(server);
       }
     };
-    return register;
   },
 
   start: (hapiOptions, smocksOptions) => {
+    console.log("Hapi start called!!!");
     if (!smocks.id()) {
       throw new Error('You must set an id value for the smocks instance... smocks.id("my-project")');
     }
@@ -80,8 +68,13 @@ export default {
       hapiConnectionOptions.routes = { cors: true };
     }
 
-    const server = new Hapi.Server(hapiServerOptions);
-    server.connection(hapiConnectionOptions);
+    // const server = new Hapi.Server(hapiServerOptions);
+    // server.connection(hapiConnectionOptions);
+    const server = new Hapi.Server(
+      {
+        ...hapiServerOptions,
+        ...hapiConnectionOptions
+      });
 
     configServer(server);
     server.start(function (err) {
@@ -126,6 +119,7 @@ function wrapReply(request, reply, plugins) {
 }
 
 function configServer(server) {
+
   // set the input types on the smocks object
   smocks.input = function (type, options) {
     _inputs[type] = options;

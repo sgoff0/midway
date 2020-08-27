@@ -36,28 +36,33 @@ export default function (server, mocker) {
   connection.route({
     method: 'GET',
     path: '/_admin',
-    handler: ensureInitialized(function (request, reply) {
+    handler: ensureInitialized(function (request, h) {
       Logger.info('Received /admin request. Redirecting to /midway');
-      reply.redirect('/midway');
+      return h.redirect('/midway');
     })
   });
 
   connection.route({
     method: 'GET',
     path: '/midway',
-    handler: ensureInitialized(function (request, reply) {
-      reply = wrapReply(request, reply);
+    handler: (request, h) => {
+      //   return "test";
+      // }
+      // handler: ensureInitialized(function (request, h) {
+      // return "test";
+      // h = wrapReply(request, h);
       fs.readFile(__dirname + '/config-page.html', { encoding: 'utf8' }, function (err, html) {
         if (err) {
           Logger.error(err);
-          reply(err);
+          return h.response(err);
         } else {
           const data = formatData(mocker, request);
           html = html.replace('{data}', JSON.stringify(data));
-          reply(html);
+          // return h.response(html);
+          return html;
         }
       });
-    })
+    }
   });
 
   connection.route({
@@ -239,7 +244,7 @@ export default function (server, mocker) {
   });
 
   function ensureInitialized(func) {
-    return function (request, reply) {
+    return function (request, h) {
 
       function doInit() {
         _.each(mocker.routes.get(), function (route) {
@@ -255,25 +260,31 @@ export default function (server, mocker) {
           doInit();
         }
         const returnConfig = request.query.returnConfig;
-        func.call(this, request, reply, !!returnConfig);
+        func.call(this, request, h, !!returnConfig);
       });
     };
   }
 
-  function wrapReply(request, reply) {
+  function wrapReply(request, h) {
     const rtn = function (payload) {
-      const response = reply.call(this, payload).hold();
+      const response = h.response(payload);
+      // const response = reply.call(this, payload).hold();
       if (mocker.state.onResponse) {
         mocker.state.onResponse(request, response);
       }
-      return response.send();
+      // return response.send();
+      return response;
     };
     rtn.file = function () {
-      const response = reply.file.apply(reply, arguments).hold();
+      // const response = reply.file.apply(reply, arguments).hold();
+      // TODO sgoff0 is h.file a thing?
+      console.error("Is h.file a thing?");
+      const response = h.file(arguments);
       if (mocker.state.onResponse) {
         mocker.state.onResponse(request, response);
       }
-      return response.send();
+      // return response.send();
+      return response;
     };
     return rtn;
   }

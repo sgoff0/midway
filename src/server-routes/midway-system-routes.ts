@@ -27,13 +27,13 @@ export default {
     label: 'Midway - Set Mock Id',
     path: Constants.MIDWAY_API_PATH + '/setMockId/{mockid}/{sessionid?}',
     config: config,
-    handler: function (req, reply) {
+    handler: function (req, h) {
       const mockid = req.params.mockid;
       const sessionId = getSessionIdFromRequest(req);
 
       Utils.setMockId(mockid, sessionId);
       const currentMockId = Utils.getMockId(sessionId);
-      reply({ 'mockId': currentMockId }).code(200);
+      h.response({ 'mockId': currentMockId }).code(200);
     }
   },
 
@@ -42,11 +42,11 @@ export default {
     label: 'Midway - Get Mock Id',
     path: Constants.MIDWAY_API_PATH + '/getMockId/{sessionid?}',
     config: config,
-    handler: function (req, reply) {
+    handler: function (req, h) {
       const sessionId = getSessionIdFromRequest(req);
       const currentMockId = Utils.getMockId(sessionId);
       //var currentMockId = getMockId(sessionId);
-      reply({ 'mockId': currentMockId }).code(200);
+      return h.response({ 'mockId': currentMockId }).code(200);
     }
   },
 
@@ -55,11 +55,11 @@ export default {
     label: 'Midway - Reset Mock Id',
     path: Constants.MIDWAY_API_PATH + '/resetMockId/{sessionid?}',
     config: config,
-    handler: function (req, reply) {
+    handler: function (req, h) {
       const sessionId = getSessionIdFromRequest(req);
       Utils.resetMockId(sessionId);
       const currentMockId = Utils.getMockId(sessionId);
-      reply({ 'mockId': currentMockId }).code(200);
+      return h.response({ 'mockId': currentMockId }).code(200);
     }
   },
 
@@ -68,11 +68,11 @@ export default {
     label: 'Midway - Reset URL Count',
     path: Constants.MIDWAY_API_PATH + '/resetURLCount/{sessionid?}',
     config: config,
-    handler: function (req, reply) {
+    handler: function (req, h) {
       const sessionId = getSessionIdFromRequest(req);
       Utils.resetURLCount(sessionId);
       const urlCounts = Utils.getURLCount(sessionId);
-      reply(urlCounts).code(200);
+      return h.response(urlCounts).code(200);
     }
   },
 
@@ -81,10 +81,10 @@ export default {
     label: 'Midway - Get URL Count',
     path: Constants.MIDWAY_API_PATH + '/getURLCount/{sessionid?}',
     config: config,
-    handler: function (req, reply) {
+    handler: function (req, h) {
       const sessionId = getSessionIdFromRequest(req);
       const urlCounts = Utils.getURLCount(sessionId);
-      reply(urlCounts).code(200);
+      return h.response(urlCounts).code(200);
     }
   },
 
@@ -93,10 +93,10 @@ export default {
     label: 'Midway - Check Session',
     path: Constants.MIDWAY_API_PATH + '/checkSession/{sessionid?}',
     config: config,
-    handler: function (req, reply) {
+    handler: function (req, h) {
       const sessionid = req.params.sessionid;
       const result = SessionManager.checkSession(sessionid);
-      reply({ 'session-status': result }).code(200);
+      return h.response({ 'session-status': result }).code(200);
     }
   },
 
@@ -105,9 +105,9 @@ export default {
     label: 'Midway - Get Sessions',
     path: Constants.MIDWAY_API_PATH + '/getSessions',
     config: config,
-    handler: function (req, reply) {
+    handler: function (req, h) {
       const result = SessionInfo.getSessions();
-      reply({ 'sessions': result }).code(200);
+      return h.response({ 'sessions': result }).code(200);
     }
   },
 
@@ -116,9 +116,9 @@ export default {
     label: 'Midway - Register Session',
     path: Constants.MIDWAY_API_PATH + '/registerSession',
     config: config,
-    handler: function (req, reply) {
+    handler: function (req, h) {
       const result = SessionManager.registerSession();
-      reply({ 'session': result }).code(200);
+      return h.response({ 'session': result }).code(200);
     }
   },
 
@@ -127,7 +127,7 @@ export default {
     label: 'Midway - Close Session',
     path: Constants.MIDWAY_API_PATH + '/closeSession/{sessionid?}',
     config: config,
-    handler: function (req, reply) {
+    handler: function (req, h) {
       const sessionId = req.params.sessionid;
       const mocksPort = req.query.mocksPort;
       const setPort = Utils.getPortInfo()[Constants.HTTP_PORT];
@@ -143,7 +143,7 @@ export default {
       }
 
       SessionManager.closeSession(sessionId, function (result) {
-        reply({ 'session': result }).code(200);
+        return h.response({ 'session': result }).code(200);
       });
     }
   },
@@ -153,10 +153,10 @@ export default {
     label: 'Midway - Set Log Level',
     path: Constants.MIDWAY_API_PATH + '/setloglevel/{loglevel}',
     config: config,
-    handler: function (req, reply) {
+    handler: function (req, h) {
       const loglevel = req.params.loglevel;
       Logger.setLogLevel(loglevel);
-      reply({ 'loglevel': Logger.getLogLevel() }).code(200);
+      return h.response({ 'loglevel': Logger.getLogLevel() }).code(200);
     }
   },
 
@@ -165,9 +165,9 @@ export default {
     label: 'Midway - Get Log Level',
     path: Constants.MIDWAY_API_PATH + '/getloglevel',
     config: config,
-    handler: function (req, reply) {
+    handler: function (req, h) {
       const result = Logger.getLogLevel();
-      reply({ 'loglevel': result }).code(200);
+      return h.response({ 'loglevel': result }).code(200);
     }
   },
 
@@ -176,9 +176,9 @@ export default {
     label: 'Midway - Reset Log Level',
     path: Constants.MIDWAY_API_PATH + '/resetloglevel',
     config: config,
-    handler: function (req, reply) {
+    handler: function (req, h) {
       Logger.resetLogLevel();
-      reply({ 'loglevel': Logger.getLogLevel() }).code(200);
+      return h.response({ 'loglevel': Logger.getLogLevel() }).code(200);
     }
   },
 
@@ -187,8 +187,8 @@ export default {
     method: '*',
     path: '/{p*}',
     label: 'Midway - Wildcard',
-    handler: function (req, reply) {
-      reply('No route defined in for this path').code(404).header(Constants.MOCKED_RESPONSE, false);
+    handler: function (req, h) {
+      return h.response('No route defined in for this path').code(404).header(Constants.MOCKED_RESPONSE, false);
     }
   },
 
@@ -197,9 +197,9 @@ export default {
     method: '*',
     path: '/_admin/{apiPath*}',
     label: 'Midway - Redirect',
-    handler: function (req, reply) {
+    handler: function (req, h) {
       Logger.info('Received /_admin request. Redirecting to /midway/' + req.params.apiPath);
-      reply.redirect('/midway/' + req.params.apiPath);
+      return h.redirect('/midway/' + req.params.apiPath);
     }
   }
 

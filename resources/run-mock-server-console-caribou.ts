@@ -2,6 +2,9 @@
 require("./caribou-mocked-data");
 
 const midway = require("../index");
+// import midway from '../src/index';
+// import * as hapi from 'hapi';
+const hapi = require('hapi');
 const util = require("util");
 import * as path from 'path';
 import { appRoot, resourcesPath } from '../src/utils/pathHelpers';
@@ -18,27 +21,30 @@ function timeout(ms) {
 
 async function main() {
   const mockedDirectory = path.join(resourcesPath, 'caribou-mocked-data');
-  midway.start({
+  const server = await midway.start({
     port: 8000,
     httpsPort: 4444,
     mockedDirectory,
     sessions: 2,
   });
 
+
+  // console.log("Started server: ", server);
+
   // midway.addStte()
-  console.log("1");
+  // console.log("1");
 
   // await timeout(10000);
 
-  await setMockVariantWithSession({
-    hostName: "localhost:8000",
-    useHttp: true,
-    fixtureToVariantMapping: {
-      "GET /cardsvcs/acs/stmt/v1/statements": "withoutStatements",
-    },
-    midwaySessionId: 0,
-  }
-  );
+  // await setMockVariantWithSession({
+  //   hostName: "localhost:8000",
+  //   useHttp: true,
+  //   fixtureToVariantMapping: {
+  //     "GET /cardsvcs/acs/stmt/v1/statements": "withoutStatements",
+  //   },
+  //   midwaySessionId: 0,
+  // }
+  // );
   // console.log("Result: ", result);
 
   // midway.setMockVariantWithSession(
@@ -69,3 +75,23 @@ async function main() {
 }
 
 main();
+
+/*
+const server = hapi.server({
+  port: 3000,
+  host: 'localhost'
+});
+
+const bootUpServer = async () => {
+  await server.start();
+  console.log(`Server is running at ${server.info.uri}`)
+
+  // process.on('unhandledRejection', (err) => {
+  //   console.log(err);
+  //   process.exit(1);
+  // })
+}
+
+bootUpServer();
+
+*/

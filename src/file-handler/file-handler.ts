@@ -136,25 +136,35 @@ function processFileData(fileData, mimeType, data) {
   return fileData;
 }
 
-function prepareAndSendResponse(reply, body, code = 200, options, mimeType?) {
+function prepareAndSendResponse(h, body, code = 200, options, mimeType?) {
   let response;
   // var code = code || 200;
   if (mimeType) {
     // Response with specific mimeType
-    response = reply(body).type(mimeType).code(code).hold();
+    response = h.response(body).type(mimeType).code(code);
+    // response = reply(body).type(mimeType).code(code).hold();
   } else if (body) {
     // Response with no specific mimeType set
-    response = reply(body).code(code).hold();
+    response = h.response(body).code(code);
+    // response = reply(body).code(code).hold();
   } else {
     // Empty body response mostly 404
-    response = reply().code(code).hold();
+    // response = reply().code(code).hold();
+    response = h.response().code(code);
   }
   const res = FileUtils.setHeadersAndCookies(response, options);
   return sendResponse(res, options.delay);
+
 }
 
 function sendResponse(response, delay) {
-  setTimeout(function () {
-    response.send();
-  }, delay);
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve(response);
+    }, delay);
+  });
+
+  // setTimeout(function () {
+  //   response.send();
+  // }, delay);
 }

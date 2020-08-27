@@ -15,7 +15,7 @@ const Url = require('url');
 const Querystring = require('querystring');
 import * as Logger from 'testarmada-midway-logger';
 
-const RequestHandler = function (request, reply) {
+const RequestHandler = function (request, h) {
   // Route all requests to sessions if server is running with sessions
 
   function prependSessionId(url, sessionId) {
@@ -86,19 +86,21 @@ const RequestHandler = function (request, reply) {
   */
   //TODO
   const midwaySessionId = extractSessionIdFromRequest();
+  console.log("Midway session id");
+  console.warn("Temporarily skipping request handler");
 
   Logger.debug('Midway Session ID:' + midwaySessionId + ' , for request url :' + request.url.path);
-  try {
-    if (midwaySessionId && !request.url.path.startsWith('/' + midwaySessionId)) {
-      Logger.debug('Prepending  Session ID:' + midwaySessionId + ' to ' + request.url.path);
-      const updatedUrl = prependSessionId(request.url.path, midwaySessionId);
-      request.setUrl(updatedUrl);
-      return reply.continue();
-    }
-  } catch (e) {
-    Logger.debug(e);
-  }
-  return reply.continue();
+  // try {
+  //   if (midwaySessionId && !request.url.path.startsWith('/' + midwaySessionId)) {
+  //     Logger.debug('Prepending  Session ID:' + midwaySessionId + ' to ' + request.url.path);
+  //     const updatedUrl = prependSessionId(request.url.path, midwaySessionId);
+  //     request.setUrl(updatedUrl);
+  //     return h.continue;
+  //   }
+  // } catch (e) {
+  //   Logger.debug(e);
+  // }
+  // return h.continue;
 };
 
 export default RequestHandler;

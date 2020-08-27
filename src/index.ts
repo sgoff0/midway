@@ -30,25 +30,15 @@ const midwayInstance = {
     return Smocks;
   },
 
-  start: function (options, callback) {
+  start: async function (options) {
     Logger.debug('***************Starting Midway mocking server ***************');
     const midwayOptions = options || {};
-    const self = this;
 
-    RepoUtil.handleMultipleRepos(midwayOptions).then(function () {
-      midwayOptions.userRoutes = userRoutes;
-
-      MidwayServer.start(midwayOptions, function (server) {
-        self.server = server;
-        if (callback) {
-          return callback(self.server);
-        }
-      });
-    }).catch(function (err) {
-      if (callback) {
-        return callback(err);
-      }
-    });
+    await RepoUtil.handleMultipleRepos(midwayOptions);
+    midwayOptions.userRoutes = userRoutes;
+    const server = await MidwayServer.start(midwayOptions);
+    this.server = server;
+    return server;
   },
 
   stop: function (server, callback?) {

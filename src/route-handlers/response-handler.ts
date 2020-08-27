@@ -20,7 +20,7 @@ import Utils from '../utils/common-utils';
 import CorsHeadersHack from '../utils/cors-headers-hack';
 
 
-const ResponseHandler = function (request, reply) {
+const ResponseHandler = function (request, h) {
   setMockedResponseHeader(request);
 
   //TODO THIS API CALL IS A HACK FOR HAPI CORS HEADERS AND SHOULD BE REMOVED ONCE FIXED BY HAPI
@@ -34,7 +34,7 @@ const ResponseHandler = function (request, reply) {
     }
   }
 
-  return reply.continue();
+  return h.continue;
 };
 
 //TODO THIS FUNCTION IS A HACK FOR HAPI CORS HEADERS AND SHOULD BE REMOVED ONCE FIXED BY HAPI

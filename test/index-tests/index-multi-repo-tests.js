@@ -1,15 +1,15 @@
 /**
-* MIT License
-*
-* Copyright (c) 2018-present, Walmart Inc.,
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*
-*/
+ * MIT License
+ *
+ * Copyright (c) 2018-present, Walmart Inc.,
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ */
 var Decache = require('decache');
 var Expect = require('chai').expect;
 var Fs = require('fs');
@@ -21,7 +21,6 @@ var Smocks = require('testarmada-midway-smocks');
 var midway;
 
 describe('index-tests-multi-repo', function () {
-
   var Sandbox;
   var CloneStub;
   var PullStub;
@@ -41,9 +40,9 @@ describe('index-tests-multi-repo', function () {
       'simple-git': function () {
         return {
           clone: CloneStub,
-          pull: PullStub
+          pull: PullStub,
         };
-      }
+      },
     });
     done();
   });
@@ -71,21 +70,25 @@ describe('index-tests-multi-repo', function () {
     FsStub.returns(false);
     midway = require('../../index');
 
-    midway.start({
-      host: 'localhost',
-      sessions: 5,
-      collectMetrics: true,
-      multipleGitRepos: [
-        {
-          'git': 'git@github.com:TestArmada/midway.git',
-          'mocks': 'endpoint.js',
-          'data': 'mockedData'
-        }]
-    }, function (err) {
-      Expect(err).to.not.be.undefined;
-      Expect(err.message).to.not.be.undefined;
-      Expect(err.message).to.equal('error in clone'); //CHECK - THIS DOESNT WORK EVEN IF CHANGED
-    });
+    midway.start(
+      {
+        host: 'localhost',
+        sessions: 5,
+        collectMetrics: true,
+        multipleGitRepos: [
+          {
+            git: 'git@github.com:TestArmada/midway.git',
+            mocks: 'endpoint.js',
+            data: 'mockedData',
+          },
+        ],
+      },
+      function (err) {
+        Expect(err).to.not.be.undefined;
+        Expect(err.message).to.not.be.undefined;
+        Expect(err.message).to.equal('error in clone'); //CHECK - THIS DOESNT WORK EVEN IF CHANGED
+      },
+    );
   });
 
   it('Verify start throws error if clone failed with multi repos no callback', function () {
@@ -93,7 +96,10 @@ describe('index-tests-multi-repo', function () {
 
     FsStub = Sinon.stub(Fs, 'existsSync');
     FsStub.returns(false);
-    var ServerControllerSpy = Sandbox.spy(require('../../lib/server-controller'), 'start');
+    var ServerControllerSpy = Sandbox.spy(
+      require('../../lib/server-controller'),
+      'start',
+    );
 
     midway = require('../../index');
     midway.start({
@@ -102,10 +108,11 @@ describe('index-tests-multi-repo', function () {
       collectMetrics: true,
       multipleGitRepos: [
         {
-          'git': 'git@github.com:TestArmada/midway.git',
-          'mocks': 'endpoint.js',
-          'data': 'mockedData'
-        }]
+          git: 'git@github.com:TestArmada/midway.git',
+          mocks: 'endpoint.js',
+          data: 'mockedData',
+        },
+      ],
     });
     Expect(ServerControllerSpy.callCount).to.equal(0);
     ServerControllerSpy.restore();
@@ -119,16 +126,15 @@ describe('index-tests-multi-repo', function () {
       id: 'repo',
       label: 'Repo',
       path: '/repo',
-      handler: function (req, reply) {
+      handler: function (req, h) {
         midway.util.respondWithFile(this, reply);
-      }
+      },
     });
     Expect(smockRouteObject.mockedDirectory).to.equal('./repos/mocked-data');
     RepoUtil.setMultiRepoDirectory(undefined);
   });
 
   it('Verify respondWithFile with mocked directory for multi repo', function (done) {
-
     var FilePathController = require('../../lib/file-handler/file-path-controller');
     var FilePathControllerSpy = Sandbox.spy(FilePathController, 'getFilePath');
 
@@ -138,7 +144,7 @@ describe('index-tests-multi-repo', function () {
     var mockedDirPath = Path.join(process.cwd(), '/repos/repo1/mockedData');
     var thisRoute = {
       route: {
-        mockedDirectory: mockedDirPath
+        mockedDirectory: mockedDirPath,
       },
       variant: {
         id: function () {
@@ -154,9 +160,9 @@ describe('index-tests-multi-repo', function () {
           },
           method: function () {
             return 'GET';
-          }
-        }
-      }
+          },
+        },
+      },
     };
 
     var reply = function () {
@@ -178,5 +184,4 @@ describe('index-tests-multi-repo', function () {
     Expect(FilePathControllerSpy.getCall(0).args[1]).to.equal(mockedDirPath);
     done();
   });
-
 });

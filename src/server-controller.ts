@@ -34,7 +34,7 @@ const internals = {
   stop: undefined,
 };
 
-internals.start = function (startOptions, callback) {
+internals.start = async function (startOptions) {
   const midwayOptions = startOptions || {};
   const DEFAULT_MOCK_DIRECTORY = Path.join(process.cwd(), Constants.MIDWAY_DEFAULT_MOCKED_DATA_LOC);
 
@@ -67,12 +67,26 @@ internals.start = function (startOptions, callback) {
     Logger.info('Starting midway server on https at https://' + midwayOptions.host + ':' + midwayOptions.httpsPort + '/midway');
   }
 
-  createHapiServer(midwayOptions, function (server) {
-    internals.addServerRoutesAndSessions(midwayOptions, server);
-    MidwayUtils.initFileHandler(midwayOptions.respondWithFileHandler);
+  // const server = new Hapi.Server({
+  //   // port: midwayOptions.port,
+  //   port: 8000,
+  //   host: 'localhost',
+  //   // labels: 'http'
+  // });
 
-    MidwayPluginController.runHapiWithPlugins(server, midwayOptions, callback);
-  });
+  const server = createHapiServer(midwayOptions);
+
+  internals.addServerRoutesAndSessions(midwayOptions, server);
+  MidwayUtils.initFileHandler(midwayOptions.respondWithFileHandler);
+
+  console.log('Before run hapi with plugins');
+  await MidwayPluginController.runHapiWithPlugins(server, midwayOptions);
+  console.log('After run hapi with plugins');
+  // });
+
+  server.start();
+
+  return server;
 };
 
 internals.stop = function (server, callback) {
@@ -110,7 +124,8 @@ internals.addServerRoutesAndSessions = function (midwayOptions, server) {
     if (midwayOptions.sessions) {
       // Intercept the request and response here
       if (server) {
-        server.ext('onRequest', requestHandler);
+        console.warn("temp skip handler");
+        // server.ext('onRequest', requestHandler);
       }
       // add midway session routes
       MidwayServerRoutes.addRoutesToSessions(midwayOptions);
@@ -121,18 +136,23 @@ internals.addServerRoutesAndSessions = function (midwayOptions, server) {
   }
 };
 
-function createHapiServer(midwayOptions, callback) {
-  const server = new Hapi.Server();
-  if (midwayOptions.httpsPort) {
-    GenerateCertManager.genCerts(midwayOptions.resolvedPath, function (err, tls) {
-      server.connection({ port: midwayOptions.port, labels: 'http' });
-      server.connection({ port: midwayOptions.httpsPort, labels: 'https', tls: tls });
-      return callback(server);
-    });
-  } else {
-    server.connection({ port: midwayOptions.port, labels: 'http' });
-    return callback(server);
-  }
+function createHapiServer(midwayOptions) {
+  // const server = new Hapi.Server();
+  // TODO sgoff0 restore https after hapi upgrade
+  // if (midwayOptions.httpsPort) {
+  //   GenerateCertManager.genCerts(midwayOptions.resolvedPath, function (err, tls) {
+  //     server.connection({ port: midwayOptions.port, labels: 'http' });
+  //     server.connection({ port: midwayOptions.httpsPort, labels: 'https', tls: tls });
+  //     return callback(server);
+  //   });
+  // } else {
+  // server.connection({ port: midwayOptions.port, labels: 'http' });
+  const server = new Hapi.Server({
+    port: midwayOptions.port,
+    // labels: 'http'
+  });
+  return server;
+  // }
 }
 
 

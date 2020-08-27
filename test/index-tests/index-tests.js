@@ -1,22 +1,21 @@
 /**
-* MIT License
-*
-* Copyright (c) 2018-present, Walmart Inc.,
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*
-*/
+ * MIT License
+ *
+ * Copyright (c) 2018-present, Walmart Inc.,
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ */
 var Expect = require('chai').expect;
 var midway = require('../../index');
 var Constants = require('../../lib/constants');
 require('../../resources/run-mock-server-api-dynamic.js');
 
 describe('index-tests', function () {
-
   it('Verify if no ID is passed, Midway server returns undefined', function (done) {
     var id = midway.id();
     Expect(id).to.equal('example');
@@ -34,11 +33,15 @@ describe('index-tests', function () {
       Expect(server.midwayOptions.port).to.equal(8080);
       Expect(server.midwayOptions.project).to.equal(Constants.DEFAULT);
       Expect(server.midwayOptions.host).to.equal('localhost');
-      Expect(server.midwayOptions.mockedDirectory).to.equal(global.appRoot + '/' + Constants.MIDWAY_DEFAULT_MOCKED_DATA_LOC);
+      Expect(server.midwayOptions.mockedDirectory).to.equal(
+        global.appRoot + '/' + Constants.MIDWAY_DEFAULT_MOCKED_DATA_LOC,
+      );
       Expect(server.midwayOptions.httpsPort).to.equal(undefined);
       Expect(server.midwayOptions.collectMetrics).to.equal(true);
       Expect(server.midwayOptions.metricsDB).to.equal(undefined);
-      Expect(typeof server.midwayOptions.respondWithFileHandler).to.equal('function');
+      Expect(typeof server.midwayOptions.respondWithFileHandler).to.equal(
+        'function',
+      );
       midway.enableMetrics(false);
       midway.stop(server, function () {
         done();
@@ -61,14 +64,17 @@ describe('index-tests', function () {
         id: 'testRouteAddServerRunning',
         label: 'Add State',
         path: '/routeAdd',
-        handler: function (req, reply) {
+        handler: function (req, h) {
           reply('test');
-        }
+        },
       });
 
       var routeFound = false;
       for (var route in server.midwayOptions.userRoutes) {
-        if (server.midwayOptions.userRoutes[route].routeData.id === 'testRouteAddServerRunning') {
+        if (
+          server.midwayOptions.userRoutes[route].routeData.id ===
+          'testRouteAddServerRunning'
+        ) {
           routeFound = true;
         }
       }
@@ -84,10 +90,12 @@ describe('index-tests', function () {
     midway.route({
       id: 'testRouteGetRoute',
       label: 'Testing getRoute',
-      path: '/testRouteGetRoute'
+      path: '/testRouteGetRoute',
     });
 
-    Expect(midway.getRoute('testRouteGetRoute').id()).to.equal('testRouteGetRoute');
+    Expect(midway.getRoute('testRouteGetRoute').id()).to.equal(
+      'testRouteGetRoute',
+    );
     Expect(midway.getRoute('testRouteBadGetRoute')).to.equal(undefined);
   });
 });

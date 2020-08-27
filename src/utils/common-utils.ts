@@ -85,12 +85,12 @@ export default {
     });
   },
 
-  respondWithMockVariant: function (route, variant, req, reply) {
+  respondWithMockVariant: function (route, variant, req, h) {
     if (route && route.route && route.route._variants && route.route._variants[variant]) {
-      return route.route._variants[variant].handler(req, reply);
+      return route.route._variants[variant].handler(req, h);
     } else {
-      if (reply) {
-        reply('No such variant: ' + variant + ' defined');
+      if (h) {
+        return ('No such variant: ' + variant + ' defined');
       } else {
         return 'Reply object must be defined';
       }

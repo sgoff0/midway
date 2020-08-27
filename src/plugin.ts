@@ -23,7 +23,6 @@ import MidwayServer from './server-controller';
 import ReadMockDataFromFile from './file-handler/file-handler';
 
 export default {
-
   toPlugin: function (hapiPluginOptions, midwayOptions = { mockedDirectory: undefined, respondWithFileHandler: undefined, hapiServer: undefined, sessions: undefined }) {
 
     // Normally the plugin/magellan is started from the automation directory.
@@ -44,11 +43,13 @@ export default {
     MidwayUtils.initializeSessionURLCallCount();
     MidwayServer.addServerRoutesAndSessions(midwayOptions, midwayOptions.hapiServer);
 
-    const plugin = SmocksHapi.toPlugin(hapiPluginOptions, midwayOptions);
+    const plugin = SmocksHapi.toPlugin(hapiPluginOptions);
 
-    plugin.attributes = {
-      sessions: midwayOptions.sessions || 0
-    };
+    // TODO sgoff0 how do we pass "attributes" in new plugin world?
+    // plugin.sessions = midwayOptions.sessions || 0
+    // plugin.attributes = {
+    //   sessions: midwayOptions.sessions || 0
+    // };
 
     return plugin;
   }
