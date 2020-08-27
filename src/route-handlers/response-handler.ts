@@ -16,15 +16,11 @@ import Constants from '../constants';
 import MetricManager from './../utils/metrics-manager';
 import Utils from '../utils/common-utils';
 
-//TODO THIS Require IS A HACK FOR HAPI CORS HEADERS AND SHOULD BE REMOVED ONCE FIXED BY HAPI
-import CorsHeadersHack from '../utils/cors-headers-hack';
-
-
 const ResponseHandler = function (request, reply) {
   setMockedResponseHeader(request);
 
   //TODO THIS API CALL IS A HACK FOR HAPI CORS HEADERS AND SHOULD BE REMOVED ONCE FIXED BY HAPI
-  setHAPICorsHeadersHack(request);
+  // setHAPICorsHeadersHack(request);
 
   const collectMetrics = MetricManager.isMetricsEnabled();
   if (collectMetrics) {
@@ -36,17 +32,6 @@ const ResponseHandler = function (request, reply) {
 
   return reply.continue();
 };
-
-//TODO THIS FUNCTION IS A HACK FOR HAPI CORS HEADERS AND SHOULD BE REMOVED ONCE FIXED BY HAPI
-function setHAPICorsHeadersHack(request) {
-  // Remove session id from the front if present
-  const routePath = Utils.getPathWithoutSessionId(request.route.path); // pathname does not have any query params
-  const corsHeaders = CorsHeadersHack.getCorsHeaders(routePath, request.method);
-
-  for (const header in corsHeaders) {
-    request.response.header(header, corsHeaders[header]);
-  }
-}
 
 function setMockedResponseHeader(request) {
   Logger.debug('Setting default header to show data is mocked for: ', request.url.path);

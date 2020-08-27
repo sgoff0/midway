@@ -30,7 +30,7 @@ const serverProps = {};
 let proxyService;
 let kairosDbUrl;
 
-function makeNetworkCall(name, requestOptions, options, callback) {
+function makeNetworkCall(name: string, requestOptions, options, callback) {
   Rp(requestOptions).then(function () {
     Logger.debug(`${name} POST Call is successful: `, requestOptions);
     if (callback) {

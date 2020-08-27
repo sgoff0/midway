@@ -16,10 +16,6 @@ import * as Logger from 'testarmada-midway-logger';
 const userRoutes = [];
 const globalVariants = [];
 
-//TODO THIS Require IS A HACK FOR HAPI CORS HEADERS AND SHOULD BE REMOVED ONCE FIXED BY HAPI
-import CorsHeadersHack from './utils/cors-headers-hack';
-
-
 class Midway {
 
   public server;
@@ -83,9 +79,6 @@ class Midway {
   public route = (data) => {
     Logger.debug('Routes.....');
     Logger.debug(JSON.stringify(data, null, 2));
-
-    //TODO THE FOLLOWING CALL IS A HACK FOR HAPI CORS HEADERS AND SHOULD BE REMOVED ONCE FIXED BY HAPI
-    CorsHeadersHack.setCorsHeaders(data);
 
     const smockRouteObject = Smocks.route(data);
 
