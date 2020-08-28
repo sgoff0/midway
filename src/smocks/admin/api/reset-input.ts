@@ -11,7 +11,7 @@ export default function (mocker: Smocks) {
       route.resetRouteVariant(request);
       route.resetSelectedInput(request);
     });
-    mocker.plugins.resetInput(request);
+    // mocker.plugins.resetInput(request);
 
     reply(respondWithConfig ? formatData(mocker, request) : {});
   };

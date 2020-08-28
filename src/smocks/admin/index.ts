@@ -240,7 +240,7 @@ export default function (server, mocker) {
           route.resetRouteVariant(request);
           route.resetSelectedInput(request);
         });
-        mocker.plugins.resetInput(request);
+        // mocker.plugins.resetInput(request);
         const initialState = JSON.parse(JSON.stringify(mocker.initOptions.initialState || {}));
         mocker.state.resetUserState(request, initialState);
       }

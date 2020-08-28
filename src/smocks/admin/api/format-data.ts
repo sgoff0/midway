@@ -4,8 +4,8 @@ function formatData(mocker, request) {
   return {
     id: mocker.id(),
     routes: formatRoutes(mocker, request),
-    globalInput: formatPluginInput(mocker),
-    globalInputValues: mocker.plugins.getInput(request),
+    // globalInput: formatPluginInput(mocker),
+    // globalInputValues: mocker.plugins.getInput(request),
     profiles: formatProfiles(mocker),
     actions: formatActions(mocker.actions.get()),
     proxies: mocker.initOptions && mocker.initOptions.proxy && _.map(mocker.initOptions.proxy, function (value, key) { return key; }),
@@ -22,19 +22,19 @@ function formatProfiles(mocker) {
   return rtn;
 }
 
-function formatPluginInput(mocker) {
-  const rtn = [];
-  const plugins = mocker.plugins.get();
-  _.each(plugins, function (plugin) {
-    if (plugin.input) {
-      rtn.push({
-        id: plugin.id(),
-        input: plugin.input()
-      });
-    }
-  });
-  return rtn;
-}
+// function formatPluginInput(mocker) {
+//   const rtn = [];
+//   const plugins = mocker.plugins.get();
+//   _.each(plugins, function (plugin) {
+//     if (plugin.input) {
+//       rtn.push({
+//         id: plugin.id(),
+//         input: plugin.input()
+//       });
+//     }
+//   });
+//   return rtn;
+// }
 
 function formatRoutes(mocker, request) {
   const routes = mocker.routes.get();

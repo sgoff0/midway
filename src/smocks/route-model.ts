@@ -346,7 +346,11 @@ class Route {
   }
 
   public selectedVariantInput = (variant, request) => {
-    let input = this._mocker.state.routeState(request)[this.id()]._variantInput;
+    const smocksState = this._mocker.state;
+    const smocksRouteState = smocksState.routeState(request);
+    const routeIdState = smocksRouteState[this._id];
+    let input = routeIdState._variantInput;
+    // let input = this._mocker.state.routeState(request)[this.id()]._variantInput;
     if (!input) {
       input = this._mocker.state.routeState(request)[this.id()]._variantInput = {};
     }

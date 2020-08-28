@@ -12,7 +12,7 @@ export class Smocks {
   public _id: string;
   private _connection;
   private _routes = [];
-  private _plugins = [];
+  // private _plugins = [];
   private _variants: Record<string, Variant> = {};
   private _profiles = {};
   private _actions = {};
@@ -33,44 +33,44 @@ export class Smocks {
     return Smocks.instance;
   }
 
-  public plugins = {
-    get: () => {
-      return this._plugins;
-    },
+  // public plugins = {
+  //   get: () => {
+  //     return this._plugins;
+  //   },
 
-    resetInput: (request) => {
-      const state = this.state.routeState(request);
-      const pluginState = state._pluginState = {};
-      _.each(this._plugins, (plugin) => {
-        const input = plugin.input();
-        if (input) {
-          pluginState[plugin.id()] = {};
-          _.each(input, (data: any, id) => {
-            this.plugins.updateInput(plugin.id(), id, data.defaultValue, request);
-          });
-        }
-      });
-    },
+  //   resetInput: (request) => {
+  //     const state = this.state.routeState(request);
+  //     const pluginState = state._pluginState = {};
+  //     _.each(this._plugins, (plugin) => {
+  //       const input = plugin.input();
+  //       if (input) {
+  //         pluginState[plugin.id()] = {};
+  //         _.each(input, (data: any, id) => {
+  //           this.plugins.updateInput(plugin.id(), id, data.defaultValue, request);
+  //         });
+  //       }
+  //     });
+  //   },
 
-    updateInput: (pluginId, id, value, request) => {
-      const input = this.state.routeState(request)._pluginState;
-      let pluginInput = input[pluginId];
-      if (!pluginInput) {
-        pluginInput = {};
-        input[pluginId] = pluginInput;
-      }
-      pluginInput[id] = value;
-    },
+  //   updateInput: (pluginId, id, value, request) => {
+  //     const input = this.state.routeState(request)._pluginState;
+  //     let pluginInput = input[pluginId];
+  //     if (!pluginInput) {
+  //       pluginInput = {};
+  //       input[pluginId] = pluginInput;
+  //     }
+  //     pluginInput[id] = value;
+  //   },
 
-    getInput: (request) => {
-      return this.state.routeState(request)._pluginState;
-    },
+  //   getInput: (request) => {
+  //     return this.state.routeState(request)._pluginState;
+  //   },
 
-    getInputValue: (pluginId, id, request) => {
-      const input = this.state.routeState(request)._pluginState[pluginId];
-      return input && input[id];
-    }
-  };
+  //   getInputValue: (pluginId, id, request) => {
+  //     const input = this.state.routeState(request)._pluginState[pluginId];
+  //     return input && input[id];
+  //   }
+  // };
 
   public routes = {
     get: (id?) => {
@@ -122,8 +122,8 @@ export class Smocks {
           route.applyProfile((route._id && profile[route._id]) || {}, request);
         });
 
-        // FIXME we're only resetting global plugin state where we should be saving that in a profile
-        this.plugins.resetInput(request);
+        // // FIXME we're only resetting global plugin state where we should be saving that in a profile
+        // this.plugins.resetInput(request);
         return true;
       } else {
         return false;
@@ -232,7 +232,7 @@ export class Smocks {
       });
 
       // FIXME we're only resetting global plugin state where we should be saving that in a profile
-      this.plugins.resetInput(request);
+      // this.plugins.resetInput(request);
       return true;
     } else {
       return false;
@@ -246,9 +246,9 @@ export class Smocks {
     return this._profiles[id];
   }
 
-  public getPlugins() {
-    return this._plugins;
-  }
+  // public getPlugins() {
+  //   return this._plugins;
+  // }
 
 
   public getRoutes(id) {
@@ -332,9 +332,9 @@ export class Smocks {
         }
       },
       input: (id) => {
-        if (plugin) {
-          return this.plugins.getInputValue(plugin.id(), id, request);
-        }
+        // if (plugin) {
+        //   return this.plugins.getInputValue(plugin.id(), id, request);
+        // }
         return route && route.getInputValue(id, request);
       },
       meta: (id) => {

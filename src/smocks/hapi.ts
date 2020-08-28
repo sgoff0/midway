@@ -98,17 +98,17 @@ export default {
 
 // TODO sgoff0 what does this do? Added in https://github.com/jhudson8/smocks/commit/5a354862a7c98a18d47f114cf7ed30987d7ada10
 // Cors related?
-function wrapReply(request, reply, plugins) {
+function wrapReply(request, reply) {
   const rtn = function () {
     const response = reply.apply(this, arguments);
     if (smocks.state.onResponse) {
       smocks.state.onResponse(request, response);
     }
-    _.each(plugins, function (plugin) {
-      if (plugin.onResponse) {
-        plugin.onResponse(request, response);
-      }
-    });
+    // _.each(plugins, function (plugin) {
+    //   if (plugin.onResponse) {
+    //     plugin.onResponse(request, response);
+    //   }
+    // });
     return response;
   };
   _.each(['continue', 'file', 'view', 'close', 'proxy', 'redirect'], function (key) {
@@ -131,7 +131,7 @@ function configServer(server) {
   };
 
   const _routes = smocks.routes.get();
-  const _plugins = smocks.plugins.get();
+  // const _plugins = smocks.plugins.get();
 
   _.each(_routes, (route: Route) => {
     if (route.hasVariants()) {
@@ -152,9 +152,10 @@ function configServer(server) {
               route.resetRouteVariant(request);
               route.resetSelectedInput(request);
             });
-            smocks.plugins.resetInput(request);
+            // smocks.plugins.resetInput(request);
             const initialState = JSON.parse(JSON.stringify(smocks.initOptions.initialState || {}));
             smocks.state.resetUserState(request, initialState);
+            console.log("Smocks state: ", smocks.state);
           }
 
           function doExecute() {
@@ -162,19 +163,19 @@ function configServer(server) {
               smocks.state.onRequest(request, reply);
             }
 
-            let pluginIndex = 0;
+            const pluginIndex = 0;
             function handlePlugins() {
-              const plugin = _plugins[pluginIndex++];
-              if (plugin) {
-                if (plugin.onRequest) {
-                  plugin.onRequest.call(smocks._executionContext(request, route, plugin), request, reply, handlePlugins);
-                } else {
-                  handlePlugins();
-                }
-              } else {
-                reply = wrapReply(request, reply, _plugins);
-                route._handleRequest.call(route, request, reply);
-              }
+              // const plugin = _plugins[pluginIndex++];
+              // if (plugin) {
+              //   if (plugin.onRequest) {
+              //     plugin.onRequest.call(smocks._executionContext(request, route, plugin), request, reply, handlePlugins);
+              //   } else {
+              //     handlePlugins();
+              //   }
+              // } else {
+              reply = wrapReply(request, reply);
+              route._handleRequest.call(route, request, reply);
+              // }
             }
 
             handlePlugins();

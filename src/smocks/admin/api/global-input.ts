@@ -8,7 +8,7 @@ export default function (mocker: Smocks) {
     const id = request.payload.id;
     const value = request.payload.value;
 
-    mocker.plugins.updateInput(pluginId, id, value, request);
+    // mocker.plugins.updateInput(pluginId, id, value, request);
 
     reply(respondWithConfig ? formatData(mocker, request) : {});
   };
