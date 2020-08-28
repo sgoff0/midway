@@ -1,16 +1,3 @@
-/**
-* MIT License
-*
-* Copyright (c) 2018-present, Walmart Inc.,
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*
-*/
-// make this file a module
 import * as Logger from 'testarmada-midway-logger';
 import * as MidwayUtil from 'testarmada-midway-util';
 
@@ -24,19 +11,19 @@ let midwaySessions = {};
 const sessionState = { 'available': 'AVAILABLE', 'inuse': 'IN_USE', 'invalid': 'DOES_NOT_EXISTS', 'busy': 'NOT_AVAILABLE' };
 const Async = require('async');
 
-export default {
-  SESSION_STATE: sessionState,
+class SessionManager {
+  public SESSION_STATE = sessionState;
 
-  checkSession: function (sessionId) {
+  public checkSession = (sessionId) => {
     if (sessionId in midwaySessions) {
       return midwaySessions[sessionId];
     } else {
       Logger.debug('No session id with value: ' + sessionId);
       return sessionState.invalid;
     }
-  },
+  }
 
-  addSessions: function (sessionCount) {
+  public addSessions = (sessionCount) => {
     for (let count = 0; count < sessionCount; count++) {
       const sessionId = MidwayUtil.generateUniqueId();
       midwaySessions[sessionId] = sessionState.available;
@@ -45,9 +32,9 @@ export default {
 
     SessionInfo.setSession(midwaySessions);
     return midwaySessions;
-  },
+  }
 
-  registerSession: function () {
+  public registerSession = () => {
     for (const sessionId in midwaySessions) {
       if (midwaySessions[sessionId] == sessionState.available) {
         Logger.info('Registering session: ' + sessionId);
@@ -58,9 +45,9 @@ export default {
 
     Logger.info('No Sessions are available');
     return sessionState.busy;
-  },
+  }
 
-  closeSession: function (sessionId, callback) {
+  public closeSession = (sessionId, callback) => {
     if (sessionId in midwaySessions) {
       if (midwaySessions[sessionId] !== sessionState.available) {
         Logger.info('Closing session: ' + sessionId);
@@ -121,9 +108,11 @@ export default {
       Logger.debug('No session id with value: ' + sessionId);
       return callback(sessionState.invalid);
     }
-  },
+  }
 
-  clearSessions: function () {
+  public clearSessions = () => {
     midwaySessions = {};
   }
 };
+
+export default new SessionManager();
