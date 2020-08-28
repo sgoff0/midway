@@ -12,7 +12,8 @@
 */
 export { };
 import formatData from './format-data';;
-const sessionManager = require('./util/session-manager');
+// const sessionManager = require('./util/session-manager');
+import sessionManager from './util/session-manager';
 const Logger = require('testarmada-midway-logger');
 const _ = require('lodash');
 

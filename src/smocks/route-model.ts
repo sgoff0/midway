@@ -1,88 +1,93 @@
-/**
-* MIT License
-*
-* Copyright (c) 2018-present, Walmart Inc.,
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*
-*/
-export { };
-const _ = require('lodash');
+import * as _ from 'lodash';
 const Logger = require('testarmada-midway-logger');
-const Variant = require('./variant-model');
+import Variant from './variant-model';
+import { Smocks } from '.';
 
-const Route = function (data, mocker) {
-  this._mocker = mocker;
-  this._label = data.label;
-  this._path = data.path;
-  this._method = data.method || 'GET';
-  this._group = data.group;
-  this._id = data.id || this._method + ':' + this._path;
+class Route {
+  private _mocker: Smocks;
+  private _label: string;
+  private _path: string;
+  public _method: string;
+  private _group;
+  private _id;
+  private _config;
+  private _connection;
+  private _input;
+  private _meta;
+  private _variants;
+  private _orderedVariants;
+  private _actions;
+  private _display;
+  private _activeVariant;
+  private _hasVariants;
 
-  this._config = data.config;
-  this._connection = data.connection;
-  this._input = data.input;
-  this._meta = data.meta;
-  this._variants = {};
-  this._orderedVariants = [];
-  this._actions = data.actions || {};
-  this._display = data.display;
-  this._activeVariant = 'default';
+  public constructor(data, mocker: Smocks) {
+    this._mocker = mocker;
+    this._label = data.label;
+    this._path = data.path;
+    this._method = data.method || 'GET';
+    this._group = data.group;
+    this._id = data.id || this._method + ':' + this._path;
+    this._config = data.config;
+    this._connection = data.connection;
+    this._input = data.input;
+    this._meta = data.meta;
+    this._variants = {};
+    this._orderedVariants = [];
+    this._actions = data.actions || {};
+    this._display = data.display;
+    this._activeVariant = 'default';
 
-  if (data.handler) {
-    this.variant({
-      id: 'default',
-      label: data.variantLabel,
-      handler: data.handler
-    });
+    if (data.handler) {
+      this.variant({
+        id: 'default',
+        label: data.variantLabel,
+        handler: data.handler
+      });
+    }
+
+    if (data.actions) {
+      this._actions = data.actions;
+    }
+
   }
 
-  if (data.actions) {
-    this._actions = data.actions;
-  }
-
-  const self = this;
-  this.actions = {
-    get: function () {
-      return self._actions;
+  public actions = {
+    get: () => {
+      return this._actions;
     },
-    execute: function (id, input, request) {
-      const action = self._actions[id];
+    execute: (id, input, request) => {
+      const action = this._actions[id];
       if (!action) {
         return null;
       } else {
         return action.handler.call(executionContext(self, request), input);
       }
     }
-  };
-};
 
-_.extend(Route.prototype, {
-  id: function () {
+  }
+
+  public id = () => {
     return this._id;
-  },
+  }
 
-  method: function () {
+  public method = () => {
     return this._method;
-  },
+  }
 
-  group: function () {
+  public group = () => {
     return this._group;
-  },
+  }
 
-  connection: function () {
+  public connection = () => {
     return this._connection;
-  },
+  }
 
-  path: function () {
+  public path = () => {
     return this._path;
-  },
+  }
 
-  action: function (id, options) {
+  public action = (id, options) => {
     if (!options) {
       options = id;
       id = options.id;
@@ -92,32 +97,32 @@ _.extend(Route.prototype, {
 
     this._actions[id] = options;
     return this;
-  },
+  }
 
-  display: function (displayFunc) {
+  public display = (displayFunc) => {
     if (!displayFunc) {
       return this._display;
     } else {
       this._display = displayFunc;
       return this;
     }
-  },
+  }
 
-  getDisplayValue: function (request) {
+  public getDisplayValue = (request) => {
     if (this._display) {
       return this._display.call(executionContext(this, request));
     }
-  },
+  }
 
-  label: function (label) {
+  public label = (label) => {
     if (!label) {
       return this._label;
     }
     this._label = label;
     return this;
-  },
+  }
 
-  applyProfile: function (profile, request) {
+  public applyProfile = (profile, request) => {
     // set the default input and then we'll override
     this.resetRouteVariant(request);
     this.resetSelectedInput(request);
@@ -128,16 +133,16 @@ _.extend(Route.prototype, {
     const selectedRouteInput = this.selectedRouteInput(request);
     _.extend(selectedRouteInput, profile.selections && profile.selections.route);
 
-    _.each(this.variants(), function (variant) {
+    _.each(this.variants(), (variant) => {
       const selectedVariantInput = this.selectedVariantInput(variant, request);
       const selections = profile.selections && profile.selections.variants && profile.selections.variants[variant.id()];
       if (selections) {
         _.extend(selectedVariantInput, selections);
       }
-    }, this);
-  },
+    });
+  }
 
-  variant: function (data) {
+  public variant = (data) => {
     const variant = new Variant(data, this);
     this._variants[variant.id()] = variant;
     this._orderedVariants.push(variant);
@@ -147,48 +152,48 @@ _.extend(Route.prototype, {
     }
 
     return variant;
-  },
+  }
 
-  variants: function () {
+  public variants = () => {
     const rtn = [];
     const index = {};
-    _.each(this._orderedVariants, function (variant) {
+    _.each(this._orderedVariants, (variant) => {
       rtn.push(variant);
       index[variant.id()] = true;
     });
-    _.each(this._mocker.variants.get(), function (variant) {
+    _.each(this._mocker.variants.get(), (variant: Variant) => {
       if (!index[variant.id()]) {
         if (!variant.appliesToRoute || variant.appliesToRoute(this)) {
           rtn.push(variant);
         }
       }
-    }, this);
+    });
     return rtn;
-  },
+  }
 
-  getVariant: function (id) {
+  public getVariant = (id) => {
     const rtn = this._variants[id];
     if (rtn) {
       return rtn;
     }
     return this._mocker.variants.get(id);
-  },
+  }
 
-  selectVariant: function (id, request) {
+  public selectVariant = (id, request) => {
     let match = false;
-    _.each(this._variants, function (variant) {
+    _.each(this._variants, (variant) => {
       if (variant.id() === id) {
         match = true;
         variant.onActivate && variant.onActivate.call(executionContext(this, request));
       }
     });
     if (!match) {
-      _.each(this._mocker.variants.get(), function (variant) {
+      _.each(this._mocker.variants.get(), (variant: Variant) => {
         if (variant.id() === id) {
           match = true;
           variant.onActivate && variant.onActivate.call(executionContext(this, request), this);
         }
-      }, this);
+      });
     }
 
     if (match) {
@@ -198,36 +203,36 @@ _.extend(Route.prototype, {
       return new Error("no variants found with id : " + id);
     }
     return undefined;
-  },
+  }
 
 
-  getActiveVariant: function (request) {
+  public getActiveVariant = (request) => {
     const id = this.activeVariant(request);
-    return _.find(this.variants(), function (variant) {
+    return _.find(this.variants(), (variant) => {
       return variant.id() === id;
     });
-  },
+  }
 
-  hasVariants: function () {
+  public hasVariants = () => {
     return this._hasVariants;
-  },
+  }
 
 
-  plugin: function (plugin) {
-    return this._mocker.plugin(plugin);
-  },
+  // public plugin = (plugin) => {
+  //   return this._mocker.plugin(plugin);
+  // }
 
-  respondWith: function (responder) {
+  public respondWith = (responder) => {
     const variant = this.variant('default');
     return variant.respondWith(responder);
-  },
+  }
 
-  respondWithFile: function (options) {
+  public respondWithFile = (options) => {
     const variant = this.variant('default');
     return variant.respondWithFile(options);
-  },
+  }
 
-  activeVariant: function (request) {
+  public activeVariant = (request) => {
     const variantFromRequestHeader = request.headers['x-request-variant'];
     const variantFromRouteState = this._mocker.state.routeState(request)[this._id]._activeVariant;
 
@@ -242,41 +247,41 @@ _.extend(Route.prototype, {
     // causes an http 500 response status code if a variant is set that doesn't actually exist
     return variantFromRequestHeader || variantFromSession || variantFromRouteState;
 
-  },
+  }
 
-  done: function () {
+  public done = () => {
     return this._mocker;
-  },
+  }
 
-  input: function (input) {
+  public input = (input?) => {
     if (input) {
       this._input = input;
       return this;
     } else {
       return this._input;
     }
-  },
+  }
 
-  config: function (config) {
+  public config = (config?) => {
     if (config) {
       this._config = config;
       return this;
     } else {
       return this._config;
     }
-  },
+  }
 
-  meta: function (meta) {
+  public meta = (meta) => {
     if (meta) {
       this._meta = meta;
       return this;
     } else {
       return this._meta;
     }
-  },
+  }
 
   // reset selected route variant
-  resetRouteVariant: function (request) {
+  public resetRouteVariant = (request) => {
     const routeState: any = this._mocker.state.routeState(request)[this.id()] = {};
     const variants = this.variants();
     for (let i = 0; i < variants.length; i++) {
@@ -284,9 +289,9 @@ _.extend(Route.prototype, {
       this._activeVariant = variants[i].id();
       break;
     }
-  },
+  }
 
-  resetSelectedInput: function (request) {
+  public resetSelectedInput = (request) => {
     let rootInput = this._mocker.state.routeState(request)[this.id()];
     if (!rootInput) {
       this._mocker.state.routeState(request)[this.id()] = {};
@@ -303,32 +308,32 @@ _.extend(Route.prototype, {
       }
     }
 
-    _.each(this.input(), function (data, key) {
+    _.each(this.input(), (data, key) => {
       setDefaultValue(key, data, selectedRouteInput);
-    }, this);
+    });
 
-    _.each(this.variants(), function (variant) {
+    _.each(this.variants(), (variant) => {
       // console.log("This (SVI): ", route);
       route.selectVariantInput({}, variant, request);
       const selectedVariantInput = route.selectedVariantInput(variant, request);
-      _.each(variant.input(), function (data, key) {
+      _.each(variant.input(), (data, key) => {
         setDefaultValue(key, data, selectedVariantInput);
       });
     });
-  },
+  }
 
-  selectRouteInput: function (selectedInput, request) {
+  public selectRouteInput = (selectedInput, request) => {
     const input = this._mocker.state.routeState(request);
     input[this.id()]._input = selectedInput || {};
     return this;
-  },
+  }
 
-  selectedRouteInput: function (request) {
+  public selectedRouteInput = (request) => {
     const input = this._mocker.state.routeState(request);
     return input[this.id()]._input;
-  },
+  }
 
-  getInputValue: function (id, request) {
+  public getInputValue = (id, request) => {
     const routeInput = this.selectedRouteInput(request);
     if (!_.isUndefined(routeInput[id])) {
       return routeInput[id];
@@ -337,9 +342,9 @@ _.extend(Route.prototype, {
     const variant = this.getActiveVariant(request);
     const variantInput = this.selectedVariantInput(variant, request);
     return variantInput[id];
-  },
+  }
 
-  selectedVariantInput: function (variant, request) {
+  public selectedVariantInput = (variant, request) => {
     let input = this._mocker.state.routeState(request)[this.id()]._variantInput;
     if (!input) {
       input = this._mocker.state.routeState(request)[this.id()]._variantInput = {};
@@ -349,30 +354,30 @@ _.extend(Route.prototype, {
       input = input[variant.id()] = {};
     }
     return input;
-  },
+  }
 
-  selectVariantInput: function (selectedInput, variant, request) {
+  public selectVariantInput = (selectedInput, variant, request) => {
     const routeState = this._mocker.state.routeState(request);
     const id = this.id();
     const routeStateForId = routeState[id];
     const variantInput = routeStateForId?._variantInput;
     const input = this._mocker.state.routeState(request)[this.id()];
     input._variantInput[variant.id()] = selectedInput;
-  },
+  }
 
-  getMetaValue: function (id) {
+  public getMetaValue = (id) => {
     return this._meta && this._meta[id];
-  },
+  }
 
-  start: function () {
-    this._mocker.start.apply(this._mocker, arguments);
-  },
+  // public start = () => {
+  //   this._mocker.start.apply(this._mocker, arguments);
+  // }
 
-  toHapiPlugin: function () {
-    return this._mocker.toHapiPlugin.apply(this._mocker, arguments);
-  },
+  // public toHapiPlugin = () => {
+  //   return this._mocker.toHapiPlugin.apply(this._mocker, arguments);
+  // }
 
-  _handleRequest: function (request, reply) {
+  public _handleRequest = (request, reply) => {
     const self = this;
     const mocker = this._mocker;
     const variant = this.getActiveVariant(request);
@@ -388,22 +393,24 @@ _.extend(Route.prototype, {
       Logger.error('no selected handler found for ' + this._path);
       reply('no selected handler found for ' + this.path).code(500);
     }
-  },
+  }
 
-  route: function (data) {
-    if (!this.isDone) {
-      this.done();
-    }
+  public route = (data) => {
+    // if (!this.isDone) {
+    //   this.done();
+    // }
 
     return this._mocker.route(data);
-  },
-
-  global: function () {
-    return this._mocker.global();
   }
-});
 
-module.exports = Route;
+  // public global = () => {
+  //   return this._mocker.global();
+  // }
+
+}
+
+export default Route;
+// module.exports = Route;
 
 function executionContext(route, request) {
   const variant = route.getActiveVariant(request);

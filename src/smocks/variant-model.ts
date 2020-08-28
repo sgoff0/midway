@@ -1,69 +1,66 @@
-/**
-* MIT License
-*
-* Copyright (c) 2018-present, Walmart Inc.,
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*
-*/
-export { };
-const _ = require('lodash');
+import * as _ from 'lodash';
 const mimeTypes = require('mime-types');
-const fs = require('fs');
-const Path = require('path');
+import * as fs from 'fs';
+import * as Path from 'path';
+import Route from './route-model';
 
-const Variant = function (data, route) {
-  if (_.isString(data)) {
-    data = { id: data };
+class Variant {
+  private _id;
+  private _label;
+  public handler;
+  private _route: Route;
+  private _input;
+  public appliesToRoute;
+  public state;
+  public onActivate;
+
+  public constructor(data, route: Route) {
+    if (_.isString(data)) {
+      data = { id: data };
+    }
+    this._id = data.id || 'default';
+    this._label = data.label;
+    this.handler = data.handler;
+    this._route = route;
+    this._input = data.input;
+    this.appliesToRoute = data.appliesToRoute;
   }
-  this._id = data.id || 'default';
-  this._label = data.label;
-  this.handler = data.handler;
-  this._route = route;
-  this._input = data.input;
-  this.appliesToRoute = data.appliesToRoute;
-};
-_.extend(Variant.prototype, {
 
-  id: function () {
+
+  public id = () => {
     return this._id;
-  },
+  }
 
-  label: function (label) {
+  public label = (label) => {
     if (label) {
       this._label = label;
       return this;
     } else {
       return this._label;
     }
-  },
+  }
 
-  input: function (input) {
+  public input = (input) => {
     if (input) {
       this._input = input;
       return this;
     } else {
       return this._input;
     }
-  },
+  }
 
-  plugin: function (plugin) {
-    return this._route.plugin(plugin);
-  },
+  // public plugin = (plugin) => {
+  //   return this._route.plugin(plugin);
+  // }
 
-  respondWith: function (handler) {
+  public respondWith = (handler) => {
     this.handler = handler;
     this.done();
     return this;
-  },
+  }
 
-  respondWithFile: function (options) {
-    const self = this;
-    return this.respondWith(function (request, reply) {
+  public respondWithFile = (options) => {
+    return this.respondWith((request, reply) => {
       options = options || {};
       if (_.isString(options)) {
         options = {
@@ -71,15 +68,15 @@ _.extend(Variant.prototype, {
         };
       }
       if (options.path) {
-        const path = Path.resolve(options.path.replace(/\{([^\}]+)\}/g, function (match, token) {
+        const path = Path.resolve(options.path.replace(/\{([^\}]+)\}/g, (match, token) => {
           let val = request.params[token];
           if (!val) {
-            val = self.state(token);
+            val = this.state(token);
           }
           return val || match;
         }));
         // a specific file name was provided
-        fs.readFile(path, function (err, stream) {
+        fs.readFile(path, (err, stream) => {
           if (err) {
             if (err.code === 'ENOENT') {
               // doesn't exist
@@ -103,8 +100,8 @@ _.extend(Variant.prototype, {
         handlerFunction({
           request: request,
           reply: reply,
-          route: self._route,
-          variant: self,
+          route: this._route,
+          variant: this,
           options: options,
           smocksOptions: initOptions
         });
@@ -112,11 +109,12 @@ _.extend(Variant.prototype, {
     });
 
 
-    return this.respondWith(function (request, reply) {
-      const self = this;
+    return this.respondWith((request, reply) => {
+      // const self = this;
       console.error("Commented out code here around filename");
       // TODO sgoff0 where does filename come from?
-      // fileName = fileName.replace(/\{([^\}]+)\}/g, function (match, token) {
+      throw new Error("TODO sgoff0 where does filename come from?");
+      // fileName = fileName.replace(/\{([^\}]+)\}/g, (match, token) => {
       //   let val = request.params[token];
       //   if (!val) {
       //     val = self.state(token);
@@ -125,31 +123,30 @@ _.extend(Variant.prototype, {
       // });
       // reply.file(fileName);
     });
-  },
-
-  variant: function () {
-    return this._route.variant.apply(this._route, arguments);
-  },
-
-  route: function () {
-    return this._route.route.apply(this._route, arguments);
-  },
-
-  start: function () {
-    return this._route.start.apply(this._route, arguments);
-  },
-
-  toHapiPlugin: function () {
-    return this._route.toHapiPlugin.apply(this._mocker, arguments);
-  },
-
-  done: function () {
-    this._route.done();
-  },
-
-  global: function () {
-    return this._route.global();
   }
-});
 
-module.exports = Variant;
+  public variant = (...args: any[]) => {
+    return this._route.variant.apply(this._route, ...args);
+  }
+
+  public route = (...args: any[]) => {
+    return this._route.route.apply(this._route, ...args);
+  }
+
+  // public start = (...args: any[]) => {
+  //   return this._route.start.apply(this._route, ...args);
+  // }
+
+  // public toHapiPlugin = (...args: any[]) => {
+  //   return this._route.toHapiPlugin.apply(this._mocker, ...args);
+  // }
+
+  public done = () => {
+    this._route.done();
+  }
+
+  // public global = () => {
+  //   return this._route.global();
+  // }
+}
+export default Variant;

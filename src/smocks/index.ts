@@ -1,30 +1,19 @@
-/**
-* MIT License
-*
-* Copyright (c) 2018-present, Walmart Inc.,
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*
-*/
-const _ = require('lodash');
+import * as _ from 'lodash';
 const Logger = require('testarmada-midway-logger');
-const Route = require('./route-model');
-const Variant = require('./variant-model');
-// const Plugin = require('./plugin-model');
-const SessionManager = require('./admin/api/util/session-manager');
+import Route from './route-model';
+import Variant from './variant-model';
+// const SessionManager = require('./admin/api/util/session-manager');
+import SessionManager from './admin/api/util/session-manager';
 
 import staticState from './state/static-state';
 
-class Smocks {
+
+export class Smocks {
   public _id: string;
   private _connection;
   private _routes = [];
   private _plugins = [];
-  private _variants = {};
+  private _variants: Record<string, Variant> = {};
   private _profiles = {};
   private _actions = {};
   public options = {};
@@ -97,9 +86,10 @@ class Smocks {
   }
 
   public variants = {
-    get: (id) => {
+    get: (id?) => {
       if (!id) {
-        return _.map(this._variants, (variant) => { return variant; });
+        return _.map(this._variants, (variant: Variant) => { return variant; });
+        // return this._vari;
       }
       return this._variants[id];
     }
@@ -194,11 +184,11 @@ class Smocks {
     }
   }
 
-  public variant(data) {
-    const variant = new Variant(data, this);
-    this._variants[variant.id()] = variant;
-    return variant;
-  }
+  // public variant(data) {
+  //   const variant = new Variant(data, this);
+  //   this._variants[variant.id()] = variant;
+  //   return variant;
+  // }
 
   public profile(id, profile) {
     this._profiles[id] = profile;
@@ -272,12 +262,12 @@ class Smocks {
     }
   }
 
-  public getVariants(id) {
-    if (!id) {
-      return _.map(this._variants, (variant) => { return variant; });
-    }
-    return this._variants[id];
-  }
+  // public getVariants(id) {
+  //   if (!id) {
+  //     return _.map(this._variants, (variant) => { return variant; });
+  //   }
+  //   return this._variants[id];
+  // }
 
   // global: function () {
   //   return this;
@@ -355,4 +345,5 @@ class Smocks {
     };
   }
 }
+
 export default Smocks.getInstance();

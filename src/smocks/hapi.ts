@@ -17,8 +17,11 @@
 import smocks from './index';
 import adminApi from './admin/index';
 const Hapi = require('hapi');
-const _ = require('lodash');
+import * as _ from 'lodash';
+import Route from './route-model';
+
 const Logger = require('testarmada-midway-logger');
+
 const _inputs = {
   boolean: require('./admin/api/input-plugins/checkbox'),
   text: require('./admin/api/input-plugins/text'),
@@ -106,6 +109,8 @@ export default {
 };
 
 
+// TODO sgoff0 what does this do? Added in https://github.com/jhudson8/smocks/commit/5a354862a7c98a18d47f114cf7ed30987d7ada10
+// Cors related?
 function wrapReply(request, reply, plugins) {
   const rtn = function () {
     const response = reply.apply(this, arguments);
@@ -141,7 +146,7 @@ function configServer(server) {
   const _routes = smocks.routes.get();
   const _plugins = smocks.plugins.get();
 
-  _.each(_routes, function (route) {
+  _.each(_routes, (route: Route) => {
     if (route.hasVariants()) {
 
       let connection = server;
@@ -197,7 +202,7 @@ function configServer(server) {
         }
       });
     }
-  }, this);
+  });
 
   adminApi(server, smocks);
 }

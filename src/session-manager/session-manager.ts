@@ -7,16 +7,16 @@ import StateManager from './../state-manager/state-manager';
 import Constants from '../constants';
 import MidwayRoutesInfo from '../server-routes/midway-routes-info';
 
-let midwaySessions = {};
 const sessionState = { 'available': 'AVAILABLE', 'inuse': 'IN_USE', 'invalid': 'DOES_NOT_EXISTS', 'busy': 'NOT_AVAILABLE' };
 const Async = require('async');
 
 class SessionManager {
+  private midwaySessions = {};
   public SESSION_STATE = sessionState;
 
   public checkSession = (sessionId) => {
-    if (sessionId in midwaySessions) {
-      return midwaySessions[sessionId];
+    if (sessionId in this.midwaySessions) {
+      return this.midwaySessions[sessionId];
     } else {
       Logger.debug('No session id with value: ' + sessionId);
       return sessionState.invalid;
@@ -26,19 +26,19 @@ class SessionManager {
   public addSessions = (sessionCount) => {
     for (let count = 0; count < sessionCount; count++) {
       const sessionId = MidwayUtil.generateUniqueId();
-      midwaySessions[sessionId] = sessionState.available;
+      this.midwaySessions[sessionId] = sessionState.available;
       Logger.debug('Adding session: ' + sessionId);
     }
 
-    SessionInfo.setSession(midwaySessions);
-    return midwaySessions;
+    SessionInfo.setSession(this.midwaySessions);
+    return this.midwaySessions;
   }
 
   public registerSession = () => {
-    for (const sessionId in midwaySessions) {
-      if (midwaySessions[sessionId] == sessionState.available) {
+    for (const sessionId in this.midwaySessions) {
+      if (this.midwaySessions[sessionId] == sessionState.available) {
         Logger.info('Registering session: ' + sessionId);
-        midwaySessions[sessionId] = sessionState.inuse;
+        this.midwaySessions[sessionId] = sessionState.inuse;
         return sessionId;
       }
     }
@@ -48,8 +48,8 @@ class SessionManager {
   }
 
   public closeSession = (sessionId, callback) => {
-    if (sessionId in midwaySessions) {
-      if (midwaySessions[sessionId] !== sessionState.available) {
+    if (sessionId in this.midwaySessions) {
+      if (this.midwaySessions[sessionId] !== sessionState.available) {
         Logger.info('Closing session: ' + sessionId);
 
         Utils.resetMockId(sessionId);
@@ -91,7 +91,7 @@ class SessionManager {
             return callback(err);
           }
           Logger.debug('Calling final callback after setting all routes variants to default for sessionId: ' + sessionId);
-          midwaySessions[sessionId] = sessionState.available;
+          this.midwaySessions[sessionId] = sessionState.available;
           return callback(sessionState.available);
         };
 
@@ -111,7 +111,7 @@ class SessionManager {
   }
 
   public clearSessions = () => {
-    midwaySessions = {};
+    this.midwaySessions = {};
   }
 };
 

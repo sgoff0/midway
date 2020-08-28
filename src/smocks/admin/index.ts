@@ -1,20 +1,8 @@
-/**
-* MIT License
-*
-* Copyright (c) 2018-present, Walmart Inc.,
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*
-*/
 import formatData from './api/format-data';
 import { MIDWAY_API_PATH } from '../constants';
-const fs = require('fs');
-const Path = require('path');
-const _ = require('lodash');
+import * as fs from 'fs';
+import * as path from 'path';
+import * as _ from 'lodash';
 const Logger = require('testarmada-midway-logger');
 const MIME_TYPES = {
   '.css': 'text/css',
@@ -27,13 +15,7 @@ const MIME_TYPES = {
 
 export default function (server, mocker) {
 
-  let connection = server;
-
-  if (mocker.connection()) {
-    connection = server.select(mocker.connection());
-  }
-
-  connection.route({
+  server.route({
     method: 'GET',
     path: '/_admin',
     handler: ensureInitialized(function (request, reply) {
@@ -42,7 +24,7 @@ export default function (server, mocker) {
     })
   });
 
-  connection.route({
+  server.route({
     method: 'GET',
     path: '/midway',
     handler: ensureInitialized(function (request, reply) {
@@ -60,7 +42,7 @@ export default function (server, mocker) {
     })
   });
 
-  connection.route({
+  server.route({
     method: 'GET',
     path: '/midway-data',
     handler: ensureInitialized(function (request, reply) {
@@ -77,7 +59,7 @@ export default function (server, mocker) {
     })
   });
 
-  connection.route({
+  server.route({
     method: 'POST',
     path: MIDWAY_API_PATH + '/route/{id}',
     handler: ensureInitialized(function (request, reply, respondWithConfig) {
@@ -88,7 +70,7 @@ export default function (server, mocker) {
     })
   });
 
-  connection.route({
+  server.route({
     method: 'POST',
     path: MIDWAY_API_PATH + '/action',
     handler: ensureInitialized(function (request, reply, respondWithConfig) {
@@ -100,7 +82,7 @@ export default function (server, mocker) {
     })
   });
 
-  connection.route({
+  server.route({
     method: 'POST',
     path: MIDWAY_API_PATH + '/state/reset',
     handler: ensureInitialized(function (request, reply, respondWithConfig) {
@@ -109,7 +91,7 @@ export default function (server, mocker) {
     })
   });
 
-  connection.route({
+  server.route({
     method: "POST",
     path: MIDWAY_API_PATH + "/sessionVariantState/reset",
     handler: ensureInitialized(function (request, reply, respondWithConfig) {
@@ -118,7 +100,7 @@ export default function (server, mocker) {
     })
   });
 
-  connection.route({
+  server.route({
     method: "POST",
     path: MIDWAY_API_PATH + "/sessionVariantState/reset/{key}",
     handler: ensureInitialized(function (request, reply, respondWithConfig) {
@@ -127,7 +109,7 @@ export default function (server, mocker) {
     })
   });
 
-  connection.route({
+  server.route({
     method: "POST",
     path: MIDWAY_API_PATH + "/sessionVariantState/set/{key}",
     handler: ensureInitialized(function (request, reply, respondWithConfig) {
@@ -137,7 +119,7 @@ export default function (server, mocker) {
   });
 
 
-  connection.route({
+  server.route({
     method: 'POST',
     path: MIDWAY_API_PATH + '/input/reset',
     handler: ensureInitialized(function (request, reply, respondWithConfig) {
@@ -146,7 +128,7 @@ export default function (server, mocker) {
     })
   });
 
-  connection.route({
+  server.route({
     method: 'POST',
     path: MIDWAY_API_PATH + '/global/input/{pluginId}',
     handler: ensureInitialized(function (request, reply, respondWithConfig) {
@@ -155,7 +137,7 @@ export default function (server, mocker) {
     })
   });
 
-  connection.route({
+  server.route({
     method: 'GET',
     path: MIDWAY_API_PATH + '/profile',
     handler: ensureInitialized(function (request, reply, respondWithConfig) {
@@ -164,7 +146,7 @@ export default function (server, mocker) {
     })
   });
 
-  connection.route({
+  server.route({
     method: 'POST',
     path: MIDWAY_API_PATH + '/profile',
     handler: ensureInitialized(function (request, reply, respondWithConfig) {
@@ -173,7 +155,7 @@ export default function (server, mocker) {
     })
   });
 
-  connection.route({
+  server.route({
     method: 'POST',
     path: MIDWAY_API_PATH + '/profile/{name}',
     handler: ensureInitialized(function (request, reply, respondWithConfig) {
@@ -182,7 +164,7 @@ export default function (server, mocker) {
     })
   });
 
-  connection.route({
+  server.route({
     method: 'PUT',
     path: MIDWAY_API_PATH + '/profile/{name}',
     handler: ensureInitialized(function (request, reply, respondWithConfig) {
@@ -191,7 +173,7 @@ export default function (server, mocker) {
     })
   });
 
-  connection.route({
+  server.route({
     method: 'POST',
     path: MIDWAY_API_PATH + '/proxy',
     handler: ensureInitialized(function (request, reply, respondWithConfig) {
@@ -200,13 +182,13 @@ export default function (server, mocker) {
     })
   });
 
-  connection.route({
+  server.route({
     method: 'GET',
     path: '/midway/lib/{name*}',
     handler: function (request, reply) {
       try {
         const buffer = fs.readFileSync(__dirname + '/lib/' + request.params.name);
-        const ext = Path.extname(request.params.name);
+        const ext = path.extname(request.params.name);
         reply(buffer).header('Content-Type', MIME_TYPES[ext]).header('Cache-Control', 'max-age=31556926');
       } catch (e) {
         reply().code(404);
@@ -215,7 +197,7 @@ export default function (server, mocker) {
   });
 
   let compiledSource;
-  connection.route({
+  server.route({
     method: 'GET',
     path: '/midway/app.js',
     handler: function (request, reply) {
@@ -230,7 +212,7 @@ export default function (server, mocker) {
     }
   });
 
-  connection.route({
+  server.route({
     method: 'GET',
     path: '/midway/inputs.js',
     handler: function (request, reply) {
@@ -260,6 +242,7 @@ export default function (server, mocker) {
     };
   }
 
+  // TODO sgoff0 what does this do? added in https://github.com/jhudson8/smocks/commit/0ee9dd0340b4b8a278fb9eeaf212b8a2356a02c8
   function wrapReply(request, reply) {
     const rtn = function (payload) {
       const response = reply.call(this, payload).hold();
