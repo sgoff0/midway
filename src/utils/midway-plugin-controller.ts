@@ -1,7 +1,8 @@
 import SmocksHapi from '../smocks/hapi';
-const HapiSwagger = require('hapi-swagger');
-const Inert = require('inert');
-const Vision = require('vision');
+import * as Hapi from '@hapi/hapi';
+import * as HapiSwagger from 'hapi-swagger';
+import * as Inert from '@hapi/inert';
+import * as Vision from '@hapi/vision';
 import * as Logger from 'testarmada-midway-logger';
 
 export default {

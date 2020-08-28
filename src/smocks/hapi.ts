@@ -3,7 +3,7 @@
  */
 import smocks from './index';
 import adminApi from './admin/index';
-const Hapi = require('hapi');
+import * as Hapi from '@hapi/hapi';
 import * as _ from 'lodash';
 import Route from './route-model';
 
