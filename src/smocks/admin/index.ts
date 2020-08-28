@@ -11,7 +11,7 @@
 *
 */
 import formatData from './api/format-data';
-const MIDWAY_API_PATH = require('../constants').MIDWAY_API_PATH;
+import { MIDWAY_API_PATH } from '../constants';
 const fs = require('fs');
 const Path = require('path');
 const _ = require('lodash');
