@@ -52,8 +52,8 @@ function getSshGitUrl(gitUrl) {
   return gitUrl;
 }
 
-function cloneRepo(gitUrl, localPath, mockLocation, mockedDataLocation, branch) {
-  var branch = branch || DEFAULT_GIT_BRANCH;
+function cloneRepo(gitUrl, localPath, mockLocation, mockedDataLocation, branchInput) {
+  const branch = branchInput || DEFAULT_GIT_BRANCH;
 
   return new Promise(function (resolve, reject) {
 
