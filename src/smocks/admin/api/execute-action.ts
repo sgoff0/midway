@@ -10,12 +10,11 @@
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *
 */
-export { };
 const _ = require('lodash');
 const Logger = require('testarmada-midway-logger');
 import formatData from './format-data';;
 
-module.exports = function (mocker) {
+export default function (mocker) {
 
   return function (request, reply, respondWithConfig) {
     const actionId = request.payload.action;
@@ -42,7 +41,7 @@ module.exports = function (mocker) {
         // no action found
         reply('no action found').code(404);
       } else {
-        const rtn = respondWithConfig ? formatData(mocker, request) : {};
+        const rtn: any = respondWithConfig ? formatData(mocker, request) : {};
         rtn._actionResponse = actionResponse;
         reply(rtn);
       }

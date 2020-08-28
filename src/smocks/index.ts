@@ -111,7 +111,7 @@ export class Smocks {
   }
 
   public profiles = {
-    applyProfile: (profile, request) => {
+    applyProfile: (profile, request?) => {
       if (_.isString(profile)) {
         profile = this._profiles[profile];
       }

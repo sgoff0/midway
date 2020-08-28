@@ -6,7 +6,7 @@ import { Smocks } from '.';
 class Route {
   private _mocker: Smocks;
   private _label: string;
-  private _path: string;
+  public _path: string;
   public _method: string;
   private _group;
   private _id;

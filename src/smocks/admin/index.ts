@@ -3,6 +3,18 @@ import { MIDWAY_API_PATH } from '../constants';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as _ from 'lodash';
+import RouteUpdate from './api/route-update';
+import ExecuteAction from './api/execute-action';
+import ResetState from './api/reset-state';
+import ResetInput from './api/reset-input';
+import GlobalInput from './api/global-input';
+import SelectLocalProfile from './api/select-local-profile';
+import SelectRemoteProfile from './api/select-remote-profile';
+import SetProxy from './api/set-proxy';
+import resetSessionVariantState from './api/reset-session-variant-state';
+import resetSessionVariantStateByKey from './api/reset-session-variant-state-by-key';
+
+
 const Logger = require('testarmada-midway-logger');
 const MIME_TYPES = {
   '.css': 'text/css',
@@ -66,7 +78,7 @@ export default function (server, mocker) {
       reply = wrapReply(request, reply);
       const id = request.params.id;
       const route = mocker.findRoute(id);
-      require('./api/route-update')(route, mocker)(request, reply, respondWithConfig);
+      RouteUpdate(route, mocker)(request, reply, respondWithConfig);
     })
   });
 
@@ -78,7 +90,7 @@ export default function (server, mocker) {
       const id = request.params.id;
       const route = mocker.findRoute(id);
 
-      require('./api/execute-action')(mocker)(request, reply, respondWithConfig);
+      ExecuteAction(mocker)(request, reply, respondWithConfig);
     })
   });
 
@@ -87,7 +99,7 @@ export default function (server, mocker) {
     path: MIDWAY_API_PATH + '/state/reset',
     handler: ensureInitialized(function (request, reply, respondWithConfig) {
       reply = wrapReply(request, reply);
-      require('./api/reset-state')(mocker)(request, reply, respondWithConfig);
+      ResetState(mocker)(request, reply, respondWithConfig);
     })
   });
 
@@ -96,7 +108,7 @@ export default function (server, mocker) {
     path: MIDWAY_API_PATH + "/sessionVariantState/reset",
     handler: ensureInitialized(function (request, reply, respondWithConfig) {
       reply = wrapReply(request, reply);
-      require("./api/reset-session-variant-state")(mocker)(request, reply, respondWithConfig);
+      resetSessionVariantState(mocker)(request, reply, respondWithConfig);
     })
   });
 
@@ -105,7 +117,7 @@ export default function (server, mocker) {
     path: MIDWAY_API_PATH + "/sessionVariantState/reset/{key}",
     handler: ensureInitialized(function (request, reply, respondWithConfig) {
       reply = wrapReply(request, reply);
-      require("./api/reset-session-variant-state-by-key")(mocker)(request, reply, respondWithConfig);
+      resetSessionVariantStateByKey(mocker)(request, reply, respondWithConfig);
     })
   });
 
@@ -114,7 +126,7 @@ export default function (server, mocker) {
     path: MIDWAY_API_PATH + "/sessionVariantState/set/{key}",
     handler: ensureInitialized(function (request, reply, respondWithConfig) {
       reply = wrapReply(request, reply);
-      require("./api/set-session-variant-state-by-key")(mocker)(request, reply, respondWithConfig);
+      resetSessionVariantStateByKey(mocker)(request, reply, respondWithConfig);
     })
   });
 
@@ -124,7 +136,7 @@ export default function (server, mocker) {
     path: MIDWAY_API_PATH + '/input/reset',
     handler: ensureInitialized(function (request, reply, respondWithConfig) {
       reply = wrapReply(request, reply);
-      require('./api/reset-input')(mocker)(request, reply, respondWithConfig);
+      ResetInput(mocker)(request, reply, respondWithConfig);
     })
   });
 
@@ -133,25 +145,25 @@ export default function (server, mocker) {
     path: MIDWAY_API_PATH + '/global/input/{pluginId}',
     handler: ensureInitialized(function (request, reply, respondWithConfig) {
       reply = wrapReply(request, reply);
-      require('./api/global-input')(mocker)(request, reply, respondWithConfig);
+      GlobalInput(mocker)(request, reply, respondWithConfig);
     })
   });
 
-  server.route({
-    method: 'GET',
-    path: MIDWAY_API_PATH + '/profile',
-    handler: ensureInitialized(function (request, reply, respondWithConfig) {
-      reply = wrapReply(request, reply);
-      require('./api/calculate-profile')(mocker)(request, reply, respondWithConfig);
-    })
-  });
+  // server.route({
+  //   method: 'GET',
+  //   path: MIDWAY_API_PATH + '/profile',
+  //   handler: ensureInitialized(function (request, reply, respondWithConfig) {
+  //     reply = wrapReply(request, reply);
+  //     require('./api/calculate-profile')(mocker)(request, reply, respondWithConfig);
+  //   })
+  // });
 
   server.route({
     method: 'POST',
     path: MIDWAY_API_PATH + '/profile',
     handler: ensureInitialized(function (request, reply, respondWithConfig) {
       reply = wrapReply(request, reply);
-      require('./api/select-local-profile')(mocker)(request, reply, respondWithConfig);
+      SelectLocalProfile(mocker)(request, reply, respondWithConfig);
     })
   });
 
@@ -160,7 +172,7 @@ export default function (server, mocker) {
     path: MIDWAY_API_PATH + '/profile/{name}',
     handler: ensureInitialized(function (request, reply, respondWithConfig) {
       reply = wrapReply(request, reply);
-      require('./api/select-remote-profile')(mocker)(request, reply, respondWithConfig);
+      SelectRemoteProfile(mocker)(request, reply, respondWithConfig);
     })
   });
 
@@ -169,7 +181,7 @@ export default function (server, mocker) {
     path: MIDWAY_API_PATH + '/profile/{name}',
     handler: ensureInitialized(function (request, reply, respondWithConfig) {
       reply = wrapReply(request, reply);
-      require('./api/select-remote-profile')(mocker)(request, reply, respondWithConfig);
+      SelectRemoteProfile(mocker)(request, reply, respondWithConfig);
     })
   });
 
@@ -178,7 +190,7 @@ export default function (server, mocker) {
     path: MIDWAY_API_PATH + '/proxy',
     handler: ensureInitialized(function (request, reply, respondWithConfig) {
       reply = wrapReply(request, reply);
-      require('./api/set-proxy')(mocker)(request, reply, respondWithConfig);
+      SetProxy(mocker)(request, reply, respondWithConfig);
     })
   });
 
