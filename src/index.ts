@@ -4,7 +4,7 @@ import Plugin from './plugin';
 import Utils from './utils/common-utils';
 import SessionManager from './session-manager/session-manager';
 import StateManager from './state-manager/state-manager';
-import RoutesManager from './server-routes/midway-routes-manager';
+import * as RoutesManager from './server-routes/midway-routes-manager';
 import SessionInfo from './session-manager/session-info';
 import RepoUtil from './multiGitRepo/repo-util';
 import Constants from './constants';

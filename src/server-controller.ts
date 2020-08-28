@@ -19,7 +19,7 @@ import MidwayUtils from './utils/common-utils';
 import requestHandler from './route-handlers/request-handler';
 import responseHandler from './route-handlers/response-handler';
 const Hapi = require('hapi');
-import MidwayServerRoutes from './server-routes/midway-routes-manager';
+import * as MidwayServerRoutes from './server-routes/midway-routes-manager';
 import MidwayPluginController from './utils/midway-plugin-controller';
 import * as Logger from 'testarmada-midway-logger';
 import { argv as Argv } from './utils/configuration-parameters';
