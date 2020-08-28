@@ -1,0 +1,24 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Midway Admin</title>
+</head>
+<body>
+
+<div id='root'></div>
+
+<script src="https://fb.me/react-15.0.1.js"></script>
+<script src="https://fb.me/react-dom-15.0.1.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
+
+<script type="text/babel">
+    var HelloMessage = React.createClass({
+        render: function () {
+            return <h2>Hello from {this.props.name}!</h2>;
+        }
+    });
+    ReactDOM.render(<HelloMessage name="Midway Admin" />, document.getElementById('root'));
+</script>
+</body>
+</html>

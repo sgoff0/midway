@@ -6,7 +6,3 @@ it('should confirm smocks are same instance', () => {
 it('should confirm smocks are same instance', () => {
     expect(otherSmocks).toBe(smocks);
 });
-it('should confirm smocks are same instance', () => {
-    otherSmocks.state = 'hi';
-    expect(smocks.state).toBe('hi');
-});

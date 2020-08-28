@@ -1,0 +1,40 @@
+import * as Hapi from '@hapi/hapi';
+import { RouteData } from './smocks/route-model';
+import { MidwayOptions } from './types/MidwayOptions';
+export declare class Midway {
+    server: any;
+    profile: (id: any, profile: any) => void;
+    util: import("./utils/common-utils").CommonUtils;
+    log: any;
+    id: (id?: any) => string | import("./smocks").Smocks;
+    start: (midwayOptions: MidwayOptions) => Promise<Hapi.Server>;
+    stop: (server: Hapi.Server) => Promise<void>;
+    toPlugin: (hapiPluginOptions: any, options: any) => {
+        name: string;
+        version: string;
+        register: (server: any, options: any) => void;
+    };
+    route: (data: RouteData) => import("./smocks/route-model").default;
+    addGlobalVariant: (data: any) => void;
+    getRoute: (routeId?: any) => import("./smocks/route-model").default[];
+    setMockId: (mockId: any, sessionId: any) => void;
+    getMockId: (sessionId: any) => any;
+    resetMockId: (sessionId: any) => void;
+    resetMockVariantWithSession: (options: any) => Promise<void>;
+    setMockVariantWithSession: (options: any) => Promise<void>;
+    setMockVariant: (options: any, callback: any) => void;
+    resetURLCount: (sessionId: any) => void;
+    getURLCount: (sessionId: any) => any;
+    checkSession: (sessionId: any) => any;
+    getSessions: () => {};
+    registerSession: () => string;
+    closeSession: (sessionId: any, callback: any) => any;
+    clearSessions: () => void;
+    getProjectName: () => any;
+    getPortInfo: any;
+    addState: (route: any, stateKey: any, stateValue: any) => void;
+    getState: (route: any, stateKey: any) => any;
+    clearState: (sessionId: any) => void;
+}
+declare const _default: Midway;
+export default _default;

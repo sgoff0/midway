@@ -1,10 +1,13 @@
 // make this file a module
 import * as Logger from 'testarmada-midway-logger';
 import Constants from '../constants';
+import * as Hapi from '@hapi/hapi';
 
-const ResponseHandler = function (request, reply) {
+const ResponseHandler = function (request, h: Hapi.ResponseToolkit) {
   setMockedResponseHeader(request);
-  return reply.continue();
+  // TODO sgoff0 is this okay?
+  Logger.warn("Removed reply.continue()");
+  // return reply.continue();
 };
 
 function setMockedResponseHeader(request) {

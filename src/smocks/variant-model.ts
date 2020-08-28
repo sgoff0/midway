@@ -3,7 +3,26 @@ const mimeTypes = require('mime-types');
 import * as fs from 'fs';
 import * as Path from 'path';
 import Route from './route-model';
+import * as Hapi from '@hapi/hapi';
+import * as util from 'util';
+import Smocks from './index';
+const readFile = util.promisify(fs.readFile);
 
+/**
+ * Variants allows to return a different data set for a given mocked route. 
+ * Variants can be selected in the admin UI to determine what type of response a route should have. 
+ * Routes are defined using the variant method on the Route object (returned by calling the route method). 
+ */
+export interface VariantData {
+  // the variant id - used for the RESTful admin API and profile settings
+  id?: string,
+  // the variant label - used for display on the admin panel
+  label?: string,
+  // the HAPI route handler which provides the route response
+  handler?: (request: Hapi.Request, h: Hapi.ResponseToolkit) => Hapi.Lifecycle.ReturnValue,
+  input?: any,
+  appliesToRoute?: any,
+}
 class Variant {
   private _id;
   private _label;
@@ -14,10 +33,10 @@ class Variant {
   public state;
   public onActivate;
 
-  public constructor(data, route: Route) {
-    if (_.isString(data)) {
-      data = { id: data };
-    }
+  public constructor(data: VariantData = {}, route: Route) {
+    // if (_.isString(data)) {
+    //   data = { id: data };
+    // }
     this._id = data.id || 'default';
     this._label = data.label;
     this.handler = data.handler;
@@ -60,7 +79,7 @@ class Variant {
   }
 
   public respondWithFile = (options) => {
-    return this.respondWith((request, reply) => {
+    return this.respondWith(async (request, h: Hapi.ResponseToolkit) => {
       options = options || {};
       if (_.isString(options)) {
         options = {
@@ -76,30 +95,30 @@ class Variant {
           return val || match;
         }));
         // a specific file name was provided
-        fs.readFile(path, (err, stream) => {
-          if (err) {
-            if (err.code === 'ENOENT') {
-              // doesn't exist
-              return reply(path + ' not found').code(404);
-            } else {
-              return reply(err);
-            }
-          }
+        try {
+          const stream = await readFile(path, 'utf-8');
           const mimeType = mimeTypes.lookup(path);
-          reply(stream).type(mimeType).code(options.code || 200);
-        });
+          return h.response(stream).type(mimeType).code(options.code || 200);
+        } catch (err) {
+          if (err.code === 'ENOENT') {
+            // doesn't exist
+            return h.response(path + ' not found').code(404);
+          } else {
+            return err;
+          }
+        }
       } else {
         // a specific handler must be provided
-        const initOptions = require('./index').initOptions;
+        const initOptions = Smocks.initOptions;
         const handlerFunction = initOptions.respondWithFileHandler;
         if (!handlerFunction) {
-          return reply({
+          return h.response({
             message: 'no file handler function (use smocks "replyWithFileHandler" option)'
           }).code(500);
         }
         handlerFunction({
           request: request,
-          reply: reply,
+          h: h,
           route: this._route,
           variant: this,
           options: options,
@@ -126,11 +145,15 @@ class Variant {
   }
 
   public variant = (...args: any[]) => {
-    return this._route.variant.apply(this._route, ...args);
+    // This is for the chaining call of route({...}).variant({...}).variant({...}); that users can pass
+    // Currently the subsequent call isn't working properly
+    // return this._route.variant.apply(this._route, args);
+    return this._route.variant.call(this._route, ...args);
   }
 
   public route = (...args: any[]) => {
-    return this._route.route.apply(this._route, ...args);
+    // return this._route.route.apply(this._route, ...args);
+    return this._route.route.call(this._route, ...args);
   }
 
   // public start = (...args: any[]) => {

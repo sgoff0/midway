@@ -3,6 +3,7 @@ import * as Logger from 'testarmada-midway-logger';
 import * as Path from 'path';
 import Clone from './clone';
 import Constants from '../constants';
+import { MidwayOptions } from '../types/MidwayOptions';
 
 class RepoUtil {
 
@@ -51,7 +52,7 @@ class RepoUtil {
     this.setMultiRepoDirectory(undefined);
   }
 
-  public handleMultipleRepos = (midwayOptions) => {
+  public handleMultipleRepos = (midwayOptions: MidwayOptions) => {
     if (midwayOptions.multipleGitRepos) {
       this.validateRepoInfo(midwayOptions.multipleGitRepos);
 

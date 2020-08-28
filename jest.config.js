@@ -7,4 +7,6 @@ module.exports = {
   testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.(ts)x?$',
   coverageDirectory: 'coverage',
   collectCoverageFrom: ['src/**/*.{ts,tsx}', '!src/**/*.d.ts'],
+  testPathIgnorePatterns: ['dist/', 'testHelper.ts'],
+  setupFilesAfterEnv: ['<rootDir>/src/__tests__/testHelper.ts'],
 };

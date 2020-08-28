@@ -3,52 +3,52 @@
  */
 import smocks from './index';
 import adminApi from './admin/index';
-const Hapi = require('hapi');
 import * as _ from 'lodash';
 import Route from './route-model';
+import * as Hapi from '@hapi/hapi';
 
-const Logger = require('testarmada-midway-logger');
+// const Logger = require('testarmada-midway-logger');
+import * as Logger from 'testarmada-midway-logger';
+
+import boolean from './admin/api/input-plugins/checkbox';
+import text from './admin/api/input-plugins/text';
+import select from './admin/api/input-plugins/select';
+import multiselect  from './admin/api/input-plugins/multiselect';
 
 const _inputs = {
-  boolean: require('./admin/api/input-plugins/checkbox'),
-  text: require('./admin/api/input-plugins/text'),
-  select: require('./admin/api/input-plugins/select'),
-  multiselect: require('./admin/api/input-plugins/multiselect')
+  boolean,
+  text,
+  select,
+  multiselect
+};
+
+const defaultSmocksOptions = {
+  state: undefined,
+};
+
+const defaultHapiPluginOptions = {
+  onRegister: undefined
 };
 
 export default {
-  toPlugin: function (hapiPluginOptions, smocksOptions) {
-    const register: any = function (server, pluginOptions, next) {
-      function _next(err?) {
-        if (err) {
-          next(err);
-        } else {
-          configServer(server);
-          next();
-        }
-      }
+  toPlugin: function (smocksOptions = defaultSmocksOptions) {
+    return {
+      name: 'smocks-plugin',
+      version: '2.0.0',
+      register: function (server, options) {
+        smocks._sanityCheckRoutes();
+        // allow for plugin state override
+        // if (register.overrideState) {
+        //   smocksOptions.state = register.overrideState;
+        // }
+        smocksOptions = smocks._sanitizeOptions(smocksOptions);
+        // deprecate smocks.initOptions in favor of smocks.options
+        smocks.initOptions = smocks.options = smocksOptions;
+        smocks.state = smocksOptions.state;
 
-      hapiPluginOptions = hapiPluginOptions || {};
-      smocksOptions = smocksOptions || {};
-
-      smocks._sanityCheckRoutes();
-      // allow for plugin state override
-      if (register.overrideState) {
-        smocksOptions.state = register.overrideState;
-      }
-      smocksOptions = smocks._sanitizeOptions(smocksOptions);
-      // deprecate smocks.initOptions in favor of smocks.options
-      smocks.initOptions = smocks.options = smocksOptions;
-      console.log(".toPlugin Setting smocksOptions.state to smocks", smocksOptions.state);
-      smocks.state = smocksOptions.state;
-
-      if (hapiPluginOptions.onRegister) {
-        hapiPluginOptions.onRegister(server, pluginOptions, _next);
-      } else {
-        _next();
+        configServer(server);
       }
     };
-    return register;
   },
 
   start: (hapiOptions, smocksOptions) => {
@@ -63,7 +63,6 @@ export default {
       hapiConnectionOptions = hapiOptions;
     }
     smocksOptions = smocks._sanitizeOptions(smocksOptions || {});
-    console.log(".start Setting smocksOptions.state to smocks", smocksOptions.state);
     smocks.state = smocksOptions.state;
     smocks.initOptions = smocksOptions;
     smocks._sanityCheckRoutes();
@@ -71,17 +70,13 @@ export default {
     if (!hapiConnectionOptions.routes) {
       hapiConnectionOptions.routes = { cors: true };
     }
-
-    const server = new Hapi.Server(hapiServerOptions);
-    server.connection(hapiConnectionOptions);
+    const server = new Hapi.Server({
+      ...hapiServerOptions,
+      ...hapiConnectionOptions
+    });
 
     configServer(server);
-    server.start(function (err) {
-      if (err) {
-        Logger.error(err.message);
-        process.exit(1);
-      }
-    });
+    server.start();
     Logger.info('started smocks server on ' + hapiConnectionOptions.port + '.  visit http://localhost:' + hapiConnectionOptions.port + '/midway to configure');
 
     return {
@@ -98,28 +93,28 @@ export default {
 
 // TODO sgoff0 what does this do? Added in https://github.com/jhudson8/smocks/commit/5a354862a7c98a18d47f114cf7ed30987d7ada10
 // Cors related?
-function wrapReply(request, reply) {
-  const rtn = function () {
-    const response = reply.apply(this, arguments);
-    if (smocks.state.onResponse) {
-      smocks.state.onResponse(request, response);
-    }
-    // _.each(plugins, function (plugin) {
-    //   if (plugin.onResponse) {
-    //     plugin.onResponse(request, response);
-    //   }
-    // });
-    return response;
-  };
-  _.each(['continue', 'file', 'view', 'close', 'proxy', 'redirect'], function (key) {
-    rtn[key] = function () {
-      reply[key].apply(reply, arguments);
-    };
-  });
-  return rtn;
-}
+// function wrapReply(request, h: Hapi.ResponseToolkit) {
+//   const rtn = function (...args: any[]) {
+//     const response = h.response.apply(this, ...args);
+//     if (smocks.state.onResponse) {
+//       smocks.state.onResponse(request, response);
+//     }
+//     // _.each(plugins, function (plugin) {
+//     //   if (plugin.onResponse) {
+//     //     plugin.onResponse(request, response);
+//     //   }
+//     // });
+//     return response;
+//   };
+//   _.each(['file', 'view', 'close', 'proxy', 'redirect', 'response', 'code'], function (key) {
+//     rtn[key] = function (...args: any[]) {
+//       h[key].apply(h, ...args);
+//     };
+//   });
+//   return rtn;
+// }
 
-function configServer(server) {
+function configServer(server: Hapi.Server) {
   // set the input types on the smocks object
   smocks.input = function (type, options) {
     _inputs[type] = options;
@@ -130,24 +125,23 @@ function configServer(server) {
     }
   };
 
-  const _routes = smocks.routes.get();
+  const _routes = smocks.routes.get() as Route[];
   // const _plugins = smocks.plugins.get();
 
   _.each(_routes, (route: Route) => {
     if (route.hasVariants()) {
-
-      let connection = server;
-
-      if (route.connection()) {
-        connection = server.select(route.connection());
-      }
-      connection.route({
+      server.route({
         method: route.method(),
         path: route.path(),
-        config: route.config(),
-        handler: function (request, reply) {
+        // config: route.config(),
+        handler: async function (request, h: Hapi.ResponseToolkit) {
+          // TODO sgoff0 figure me out
+          // Logger.warn("Temp todo on hapi return");
+
+          // return "Temp TODO";
 
           function doInit() {
+            Logger.debug("doInit Hapi");
             _.each(_routes, function (route) {
               route.resetRouteVariant(request);
               route.resetSelectedInput(request);
@@ -155,42 +149,62 @@ function configServer(server) {
             // smocks.plugins.resetInput(request);
             const initialState = JSON.parse(JSON.stringify(smocks.initOptions.initialState || {}));
             smocks.state.resetUserState(request, initialState);
-            console.log("Smocks state: ", smocks.state);
           }
 
-          function doExecute() {
-            if (smocks.state.onRequest) {
-              smocks.state.onRequest(request, reply);
-            }
+          // async function doExecute() {
+          // Static state doens't have this
+          // if (smocks.state.onRequest) {
+          //   smocks.state.onRequest(request, h);
+          // }
 
-            const pluginIndex = 0;
-            function handlePlugins() {
-              // const plugin = _plugins[pluginIndex++];
-              // if (plugin) {
-              //   if (plugin.onRequest) {
-              //     plugin.onRequest.call(smocks._executionContext(request, route, plugin), request, reply, handlePlugins);
-              //   } else {
-              //     handlePlugins();
-              //   }
-              // } else {
-              reply = wrapReply(request, reply);
-              route._handleRequest.call(route, request, reply);
-              // }
-            }
+          // const pluginIndex = 0;
+          // async function handlePlugins() {
+          //   // const plugin = _plugins[pluginIndex++];
+          //   // if (plugin) {
+          //   //   // Thus far this block is false
+          //   //   if (plugin.onRequest) {
+          //   //     plugin.onRequest.call(smocks._executionContext(request, route, plugin), request, h, handlePlugins);
+          //   //   } else {
+          //   //     handlePlugins();
+          //   //   }
+          //   // } else {
+          //   Logger.warn("Not currently wrapping reply (h)");
+          //   // const wrappedH = wrapReply(request, h, _plugins);
+          //   // route._handleRequest.call(route, request, wrappedH);
+          //   // const retVal = await route._handleRequest.call(route, request, h);
+          //   const retVal = await route._handleRequest(request, h);
+          //   // return "Message to show";
+          //   return retVal;
+          //   // }
+          //   // return "Oops - Fallback message";
+          // }
+          // return await route._handleRequest(request, h);
 
-            handlePlugins();
+          // return handlePlugins();
+          // }
+
+          // Called on request to endpoint such as /portal
+          // Currently only static state is supported, and it's not async
+          const shouldPerformInitialization = smocks.state.initialize(request);
+          if (shouldPerformInitialization) {
+            doInit();
           }
+          // return await doExecute();
+          return await route._handleRequest(request, h);
+          // smocks.state.initialize(request, function (err, performInitialization) {
+          //   // Only seems to be true the first time
+          //   if (performInitialization) {
+          //     doInit();
+          //   }
+          // });
 
-          smocks.state.initialize(request, function (err, performInitialization) {
-            if (performInitialization) {
-              doInit();
-            }
-            doExecute();
-          });
+          // return "TEMP TODO";
         }
       });
     }
   });
+
+  // console.log("Route state: ", smocks.state.ROUTE_STATE);
 
   adminApi(server, smocks);
 }

@@ -1,7 +1,6 @@
 /**
  * Read filesystem and reply with response
  */
-import * as Fs from 'fs';
 import * as Path from 'path';
 import * as MimeTypes from 'mime-types';
 import Utils from './../utils/common-utils';
@@ -11,79 +10,77 @@ import Constants from './../constants';
 const MidwayUtils = require('testarmada-midway-util');
 import FileUtils from './file-handler-utils';
 import FilePathHelper from './file-path-controller';
+import * as Hapi from '@hapi/hapi';
+import * as util from 'util';
+import * as fs from 'fs';
+import Route from '../smocks/route-model';
+import Variant from '../smocks/variant-model';
+const readFile = util.promisify(fs.readFile);
 
 const fileExtensionOrder = ['.json', '.html', '.txt'];
 
-interface Data {
-  options: Options;
-  reply: any;
-  route: any;
-  variant: any;
+export interface FileHandlerInput {
+  options: FileHandlerOptions;
+  h: Hapi.ResponseToolkit;
+  route: Route;
+  variant: Variant;
 }
 
-interface Options {
-  code: number;
-  headers: Headers;
-}
-
-interface Headers {
-  Date: string;
-  'Strict-Transport-Security': string;
-  'X-Powered-By': string;
-  'Cache-Control': string;
-  Pragma: string;
-  Expires: string;
-  'Site-Id': string;
-  'Set-Cookie': string;
-  'Keep-Alive': string;
-  'Content-Type': string;
-  'Content-Language': string;
-  'Transfer-Encoding': string;
-  Connection: string;
+export interface FileHandlerOptions {
+  code?: number;
+  headers?: Record<string, string | boolean>;
+  filePath?: string;
+  delay?: number;
+  cookies?: any;
+  // TODO 
+  transpose?: any;
 }
 
 /***
  *
  * Provides functionality for retrieving mock data from the filesystem.
- *
+ * Guts of midway.util.respondWithFile
  */
 export default (mockDirectoryPath: string) => {
-  return (data: Data) => {
+  return async (data: FileHandlerInput) => {
+
+    // Logger.debug("Data: ", data);
     // Called when API is hit, likely to read file in realtime
-    const reply = data.reply;
 
-    FilePathHelper.getFilePath(data, mockDirectoryPath, function (filePath) {
-      Logger.debug('Filepath is : ' + filePath);
-      const mimeType = MimeTypes.lookup(filePath);
-      FileUtils.variables.mimeTypeOfResponse = mimeType;
+    const filePath = await FilePathHelper.getFilePath(data, mockDirectoryPath);
+    Logger.debug('Filepath is : ' + filePath);
+    const mimeType = MimeTypes.lookup(filePath);
+    FileUtils.variables.mimeTypeOfResponse = mimeType;
 
-      const fileExtension = Path.extname(filePath);
-      Logger.debug('File extension is ' + fileExtension);
+    const fileExtension = Path.extname(filePath);
+    Logger.debug('File extension is ' + fileExtension);
 
-      if (_.includes(fileExtensionOrder, fileExtension)) {
-        let rawFileData;
+    if (_.includes(fileExtensionOrder, fileExtension)) {
+      let rawFileData;
 
-        try {
-          rawFileData = Fs.readFileSync(filePath, 'utf-8');
-          const fileData = processFileData(rawFileData, mimeType, data);
-          return prepareAndSendResponse(reply, fileData, data.options.code, data.options, FileUtils.variables.mimeTypeOfResponse);
-        } catch (err) {
-          return handleParsingErrorCases(err, reply, rawFileData, data, filePath);
-        }
-      } else {
-        Logger.debug('Returning file as response:', filePath);
-        return reply.file(filePath);
+      try {
+        // rawFileData = Fs.readFileSync(filePath, 'utf-8');
+        rawFileData = await readFile(filePath, 'utf-8');
+        const fileData = processFileData(rawFileData, mimeType, data);
+        Logger.debug("File data: ", fileData);
+        return await prepareAndSendResponse(data.h, fileData, data.options.code, data.options, FileUtils.variables.mimeTypeOfResponse);
+        // return fileData;
+      } catch (err) {
+        return await handleParsingErrorCases(err, data.h, rawFileData, data, filePath);
       }
-    });
+    } else {
+      Logger.debug('Returning file as response:', filePath);
+      return data.h.file(filePath);
+    }
   };
 };
 
-function handleParsingErrorCases(err, reply, rawFileData, data, filePath) {
+async function handleParsingErrorCases(err, h: Hapi.ResponseToolkit, rawFileData, data: FileHandlerInput, filePath) {
   Logger.warn(err.message);
 
   // Check if json syntax error
   if (err instanceof SyntaxError) {
-    return handleJsonFileWithSyntaxError(reply, rawFileData, data, filePath);
+    return handleJsonFileWithSyntaxError(h, rawFileData, data, filePath);
   }
 
   // Update response code if file not found
@@ -91,15 +88,15 @@ function handleParsingErrorCases(err, reply, rawFileData, data, filePath) {
 
   // Respond with the file content even if parsing error occurred
   if (data.options.code) {
-    return prepareAndSendResponse(reply, undefined, data.options.code, data.options);
+    return prepareAndSendResponse(h, undefined, data.options.code, data.options);
   } else {
-    return prepareAndSendResponse(reply, err.message, Constants.NOT_FOUND, data.options);
+    return prepareAndSendResponse(h, err.message, Constants.NOT_FOUND, data.options);
   }
 }
 
-function handleJsonFileWithSyntaxError(reply, rawFileData, data, filePath) {
+async function handleJsonFileWithSyntaxError(h: Hapi.ResponseToolkit, rawFileData, data: FileHandlerInput, filePath) {
   Logger.warn('Invalid syntax in: ' + filePath + ' returning content to client anyway');
-  return prepareAndSendResponse(reply, rawFileData, data.options.code, data.options, FileUtils.variables.mimeTypeOfResponse);
+  return prepareAndSendResponse(h, rawFileData, data.options.code, data.options, FileUtils.variables.mimeTypeOfResponse);
 }
 
 function updateCodeIfFileNotFound(err, data, filePath) {
@@ -127,25 +124,26 @@ function processFileData(fileData, mimeType, data) {
   return fileData;
 }
 
-function prepareAndSendResponse(reply, body, code = 200, options, mimeType?) {
+async function prepareAndSendResponse(h: Hapi.ResponseToolkit, body, code = 200, options: FileHandlerOptions, mimeType?): Promise<any> {
   let response;
-  // var code = code || 200;
   if (mimeType) {
     // Response with specific mimeType
-    response = reply(body).type(mimeType).code(code).hold();
+    response = h.response(body).type(mimeType).code(code);
   } else if (body) {
     // Response with no specific mimeType set
-    response = reply(body).code(code).hold();
+    response = h.response(body).code(code);
   } else {
     // Empty body response mostly 404
-    response = reply().code(code).hold();
+    response = h.response().code(code);
   }
   const res = FileUtils.setHeadersAndCookies(response, options);
   return sendResponse(res, options.delay);
 }
 
 function sendResponse(response, delay) {
-  setTimeout(function () {
-    response.send();
-  }, delay);
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve(response);
+    }, delay);
+  });
 }

@@ -1,17 +1,26 @@
-class StaticState {
+import * as Hapi from '@hapi/hapi';
+import * as Logger from 'testarmada-midway-logger';
+export class StaticState {
   public doInitialize = true;
-  public ROUTE_STATE = {};
-  public USER_STATE = {};
-  public SESSION_VARIANT_STATE = {};
+  public ROUTE_STATE: Record<string, any> = {};
 
-  public initialize = (request, callback) => {
-    console.log("Calaled initialize");
-    const _doInitialize = this.doInitialize;
+  // Don't believe user state is used anywhere
+  public USER_STATE = {};
+
+  public SESSION_VARIANT_STATE: Record<string, Record<string, string>> = {
+    // "a": { "b": "c" },
+  };
+
+  public initialize = (request) => {
+    Logger.debug("Static State Initialize");
+    // const _doInitialize = this.doInitialize;
+    const shouldInitializeNow = this.doInitialize;
     this.doInitialize = false;
-    callback(undefined, _doInitialize);
+    return shouldInitializeNow;
+    // callback(undefined, _doInitialize);
   }
 
-  public userState = (request) => {
+  public userState = (request, details?) => {
     return this.USER_STATE;
   }
 
@@ -39,12 +48,12 @@ class StaticState {
     delete this.SESSION_VARIANT_STATE[key];
   }
 
-  public setSessionVariantStateByKey = (request, key, payload) => {
+  public setSessionVariantStateByKey = (request, key: string, payload: Record<string, string>) => {
     this.SESSION_VARIANT_STATE[key] = payload;
   }
 
-  public onResponse = (request, reply) => {
-    reply.state('__smocks_state', 'static', { encoding: 'none', clearInvalid: true, path: '/' });
+  public onResponse = (request, h: Hapi.ResponseToolkit) => {
+    h.state('__smocks_state', 'static', { encoding: 'none', clearInvalid: true, path: '/' });
   }
 }
 

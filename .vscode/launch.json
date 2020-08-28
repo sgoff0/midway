@@ -18,6 +18,8 @@
       "type": "node",
       "request": "launch",
       "name": "Jest Current File",
+      "runtimeVersion": "12.18.3",
+      "runtimeExecutable": "node",
       "program": "${workspaceFolder}/node_modules/.bin/jest",
       "args": ["${fileBasenameNoExtension}", "--config", "jest.config.js"],
       "console": "integratedTerminal",

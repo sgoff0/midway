@@ -3,32 +3,31 @@ import * as SuperTestRequest from 'supertest';
 import * as path from 'path';
 import { appRoot, resourcesPath } from '../../utils/pathHelpers';
 import * as util from 'util';
+import * as Hapi from '@hapi/hapi';
 
-const setMockVariant = util.promisify(midway.setMockVariant);
+// const setMockVariant = util.promisify(midway.setMockVariant);
+const mockedDirectory = path.join(resourcesPath, 'upgrade-mocked-data');
+// require(mockedDirectory);
+import '../../resources/upgrade-mocked-data';
 
 describe('Midway Server', function () {
-  let myServer;
+  let myServer: Hapi.Server;
   let request: SuperTestRequest.SuperTest<SuperTestRequest.Test>;
-  beforeEach((done) => {
-    const mockedDirectory = path.join(resourcesPath, 'upgrade-mocked-data');
-    // Call this to import all routes
-    require(mockedDirectory);
-    midway.start(
+  beforeAll(async () => {
+    const server = await midway.start(
       {
         port: 3000,
-        // httpsPort: 4444,
         mockedDirectory,
-        // sessions: 2,
-      },
-      (server) => {
-        myServer = server;
-        request = SuperTestRequest('http://localhost:3000');
-        done();
-      },
-    );
+      });
+    myServer = server;
+    request = SuperTestRequest('http://localhost:3000');
   });
-  afterEach(() => {
-    midway.stop(myServer);
+  afterEach(async () => {
+    // Reset input (with current implementation of midway, starting/stopping actually preserves some state)
+    await request.post('/midway/api/input/reset');
+  });
+  afterAll(async () => {
+    await midway.stop(myServer);
   });
   it('should be able to read valid endpoint', async () => {
     // console.log("URl count: ", midway.getURLCount());
@@ -44,7 +43,7 @@ describe('Midway Server', function () {
     // console.log("URl count: ", midway.getURLCount());
     const result = await request.post('/portal');
     expect(result.status).toBe(200);
-    await setMockVariant({
+    await midway.setMockVariant({
       mockPort: 3000,
       fixture: 'POST /portal',
       variant: 'Bank-OOB',
@@ -60,5 +59,33 @@ describe('Midway Server', function () {
   it('should read desired response body from endpoint', async () => {
     const result = await request.get('/portal');
     expect(result.body.accounts).toHaveLength(1);
+  });
+  it('should read header from endpoint', async () => {
+    const result = await request.get('/portal');
+    expect(result.headers['site-id']).toBe('Inet8TSYS');
+  });
+  it('should filter out problematic headers', async () => {
+    const result = await request.get('/portal');
+    expect(result.headers['transfer-encoding']).toBe(undefined);
+  });
+  it('should be able to use custom session approach to change session between multiple requests', async () => {
+    const result1 = await request.post('/portal');
+    expect(result1.status).toBe(200);
+
+    await request.post('/midway/api/sessionVariantState/set/3').send({
+      "POST /portal": "Bank-OOB"
+    });
+
+    // New session approach works
+    const result2 = await request.post('/portal').set('x-request-session', '3');
+    expect(result2.status).toBe(401);
+
+    // Without impacting existing session
+    const result3 = await request.post('/portal');
+    expect(result3.status).toBe(200);
+  });
+  it('Invalid session uses defaults', async () => {
+    const result2 = await request.post('/portal').set('x-request-session', 'some-session-id-not-set-with-data');
+    expect(result2.status).toBe(200);
   });
 });

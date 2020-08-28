@@ -1,5 +1,6 @@
 // require('../resources/upgrade-mocked-data');
-import './upgrade-mocked-data';
+// import './upgrade-mocked-data';
+import './endpoints';
 
 // const midway = require('../index');
 import midway from '..';
@@ -19,7 +20,8 @@ function timeout(ms) {
 }
 
 async function main() {
-    const mockedDirectory = path.join(resourcesPath, 'upgrade-mocked-data');
+    // const mockedDirectory = path.join(resourcesPath, 'upgrade-mocked-data');
+    const mockedDirectory = path.join(resourcesPath, 'mocked-data');
     midway.start({
         port: 8000,
         mockedDirectory,

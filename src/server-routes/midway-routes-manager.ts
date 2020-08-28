@@ -3,8 +3,10 @@ import MidwayServer from './midway-system-routes';
 import * as Logger from 'testarmada-midway-logger';
 import SessionManager from './../session-manager/session-manager';
 import MidwayRoutesInfo from './midway-routes-info';
+import { MidwayOptions } from '../types/MidwayOptions';
+import { Route } from '../smocks/route-model';
 
-export const addVarinatsToSessionRoutes = (currentRouteObject, smockRouteObject) => {
+export const addVarinatsToSessionRoutes = (currentRouteObject, smockRouteObject): void => {
   for (const variant in currentRouteObject._variants) {
     const variantToSet = {
       id: undefined,
@@ -23,7 +25,7 @@ export const addVarinatsToSessionRoutes = (currentRouteObject, smockRouteObject)
   }
 };
 
-export const addRoutesToSessions = (midwayOptions) => {
+export const addRoutesToSessions = (midwayOptions: MidwayOptions): void => {
 
   const sessions = SessionManager.addSessions(midwayOptions.sessions);
   Smocks.addSessions(sessions);
@@ -61,7 +63,7 @@ export const addRoutesToSessions = (midwayOptions) => {
   MidwayRoutesInfo.lockRoutes(); // Routes should not be updated as midway is started/stopped for same node process
 };
 
-export const addMidwayServerAPIs = () => {
+export const addMidwayServerAPIs = (): void => {
   for (const route in MidwayServer) {
     const routeId = MidwayServer[route].id;
     const routeExists = Smocks.findRoute(routeId);
@@ -71,14 +73,14 @@ export const addMidwayServerAPIs = () => {
   }
 };
 
-export const addGlobalVariant = (globalVariants, userRoutes, variant) => {
+export const addGlobalVariant = (globalVariants, userRoutes, variant: string): void => {
   globalVariants.push(variant);
   userRoutes.forEach(function (userRouteData) {
     userRouteData.routeObject.variant(variant);
   });
 };
 
-export const addGlobalVariantForSingleRoute = (globalVariants, smockRouteObject) => {
+export const addGlobalVariantForSingleRoute = (globalVariants, smockRouteObject: Route): void => {
   globalVariants.forEach(function (globalVariant) {
     smockRouteObject.variant(globalVariant);
   });

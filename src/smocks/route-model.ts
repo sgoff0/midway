@@ -1,28 +1,61 @@
 import * as _ from 'lodash';
 const Logger = require('testarmada-midway-logger');
-import Variant from './variant-model';
+import Variant, { VariantData } from './variant-model';
 import { Smocks } from '.';
+import * as Hapi from '@hapi/hapi';
 
-class Route {
+export interface Input {
+  label: string,
+  type: 'text' | 'boolean' | 'select' | 'multiselect',
+  defaultValue: any,
+}
+export interface RouteData {
+  // Unique route id
+  id: string,
+  // Description of the route
+  label: string,
+  // Path of the route
+  path: string,
+  // HTTP Method
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'OPTIONS',
+  // Function which handles the request for the path (Hapi handler function)
+  handler: (request: Hapi.Request, h: Hapi.ResponseToolkit) => Hapi.Lifecycle.ReturnValue,
+  // Displayed in admin UI instead of the variant id (e.g. instead of default or some-variant)
+  variantLabel?: string,
+  // Shows in admin ui under variants in a "Fixture specific details" section
+  display?: () => string,
+  // Shows a tab in Admin UI to filter endpoints of this group
+  group?: string,
+  // Displays custom buttons in an action panel of route in admin UI.  I don't know what stucture should be
+  actions?: any,
+  // Looks like it had things like cors header info and tags
+  config?: any,
+  // Add custom input to admin UI which can drive handler behavior
+  input?: Record<string, Input>,
+  // Not sure, no visual impact
+  meta?: any,
+}
+
+export class Route {
   private _mocker: Smocks;
   private _label: string;
   public _path: string;
   public _method: string;
   private _group;
-  private _id;
+  public _id;
   private _config;
-  private _connection;
+  // private _connection;
   private _input;
   private _meta;
   private _variants;
-  private _orderedVariants;
+  public _orderedVariants;
   private _actions;
   private _display;
   private _activeVariant;
   private _hasVariants;
   public mockedDirectory: string;
 
-  public constructor(data, mocker: Smocks) {
+  public constructor(data: RouteData, mocker: Smocks) {
     this._mocker = mocker;
     this._label = data.label;
     this._path = data.path;
@@ -30,7 +63,7 @@ class Route {
     this._group = data.group;
     this._id = data.id || this._method + ':' + this._path;
     this._config = data.config;
-    this._connection = data.connection;
+    // this._connection = data.connection;
     this._input = data.input;
     this._meta = data.meta;
     this._variants = {};
@@ -80,9 +113,9 @@ class Route {
     return this._group;
   }
 
-  public connection = () => {
-    return this._connection;
-  }
+  // public connection = () => {
+  //   return this._connection;
+  // }
 
   public path = () => {
     return this._path;
@@ -115,12 +148,12 @@ class Route {
     }
   }
 
-  public label = (label) => {
+  public label = (label?) => {
     if (!label) {
       return this._label;
     }
     this._label = label;
-    return this;
+    return label;
   }
 
   public applyProfile = (profile, request) => {
@@ -143,7 +176,7 @@ class Route {
     });
   }
 
-  public variant = (data) => {
+  public variant = (data: VariantData) => {
     const variant = new Variant(data, this);
     this._variants[variant.id()] = variant;
     this._orderedVariants.push(variant);
@@ -172,7 +205,7 @@ class Route {
     return rtn;
   }
 
-  public getVariant = (id) => {
+  public getVariant = (id?) => {
     const rtn = this._variants[id];
     if (rtn) {
       return rtn;
@@ -207,7 +240,7 @@ class Route {
   }
 
 
-  public getActiveVariant = (request) => {
+  public getActiveVariant = (request: Hapi.Request) => {
     const id = this.activeVariant(request);
     return _.find(this.variants(), (variant) => {
       return variant.id() === id;
@@ -224,16 +257,16 @@ class Route {
   // }
 
   public respondWith = (responder) => {
-    const variant = this.variant('default');
+    const variant = this.variant({ id: 'default' });
     return variant.respondWith(responder);
   }
 
   public respondWithFile = (options) => {
-    const variant = this.variant('default');
+    const variant = this.variant({ id: 'default' });
     return variant.respondWithFile(options);
   }
 
-  public activeVariant = (request) => {
+  public activeVariant = (request: Hapi.Request) => {
     const variantFromRequestHeader = request.headers['x-request-variant'];
     const variantFromRouteState = this._mocker.state.routeState(request)[this._id]._activeVariant;
 
@@ -293,6 +326,7 @@ class Route {
   }
 
   public resetSelectedInput = (request) => {
+    Logger.debug("Reset Selected Input");
     let rootInput = this._mocker.state.routeState(request)[this.id()];
     if (!rootInput) {
       this._mocker.state.routeState(request)[this.id()] = {};
@@ -345,11 +379,11 @@ class Route {
     return variantInput[id];
   }
 
-  public selectedVariantInput = (variant, request) => {
+  public selectedVariantInput = (variant: Variant, request: Hapi.Request) => {
     const smocksState = this._mocker.state;
     const smocksRouteState = smocksState.routeState(request);
     const routeIdState = smocksRouteState[this._id];
-    let input = routeIdState._variantInput;
+    let input = routeIdState?._variantInput;
     // let input = this._mocker.state.routeState(request)[this.id()]._variantInput;
     if (!input) {
       input = this._mocker.state.routeState(request)[this.id()]._variantInput = {};
@@ -382,21 +416,21 @@ class Route {
   //   return this._mocker.toHapiPlugin.apply(this._mocker, arguments);
   // }
 
-  public _handleRequest = (request, reply) => {
-    const self = this;
+  public _handleRequest = async (request, h: Hapi.ResponseToolkit) => {
     const mocker = this._mocker;
     const variant = this.getActiveVariant(request);
 
     if (variant) {
       if (variant.handler) {
-        return variant.handler.call(executionContext(this, request), request, reply);
+        const context = executionContext(this, request);
+        return await variant.handler.call(context, request, h);
       } else {
         Logger.error('no variant handler found for ' + this._path + ':' + variant.id());
-        reply('no variant handler found for ' + this._path + ':' + variant.id()).code(500);
+        return h.response('no variant handler found for ' + this._path + ':' + variant.id()).code(500);
       }
     } else {
       Logger.error('no selected handler found for ' + this._path);
-      reply('no selected handler found for ' + this.path).code(500);
+      return h.response('no selected handler found for ' + this.path).code(500);
     }
   }
 
@@ -415,7 +449,6 @@ class Route {
 }
 
 export default Route;
-// module.exports = Route;
 
 function executionContext(route, request) {
   const variant = route.getActiveVariant(request);

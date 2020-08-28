@@ -1,0 +1,24 @@
+declare const _default: {
+    MIDWAY_API_PATH: string;
+    MIDWAY_DEFAULT_MOCKED_DATA_LOC: string;
+    MIDWAY_PRIVATE_KEY_FILE: string;
+    MIDWAY_CERTIFICATE_FILE: string;
+    MIDWAY_CERT_FOLDER_NAME: string;
+    MOCKED_RESPONSE: string;
+    DEFAULT: string;
+    DEFAULT_VARIANT: string;
+    COLLECT_USAGE_METRICS: boolean;
+    DEFAULT_SESSION: string;
+    NOT_FOUND: number;
+    MOCK_PORT: string;
+    VARIANT: string;
+    FIXTURE: string;
+    KAIROS_DB_URL: string;
+    NOT_AVAILABLE: string;
+    HTTP_PORT: string;
+    HTTPS_PORT: string;
+    PROJECT: string;
+    MULTI_REPOS_PATH: string;
+    SESSIONID: string;
+};
+export default _default;

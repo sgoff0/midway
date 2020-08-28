@@ -1,57 +1,47 @@
 import SmocksHapi from '../smocks/hapi';
-const HapiSwagger = require('hapi-swagger');
-const Inert = require('inert');
-const Vision = require('vision');
+import * as Hapi from '@hapi/hapi';
+import * as HapiSwagger from 'hapi-swagger';
+import * as Inert from '@hapi/inert';
+import * as Vision from '@hapi/vision';
+// import * as Logger from 'testarmada-midway-logger';
 import * as Logger from 'testarmada-midway-logger';
+import { MidwayOptions } from '../types/MidwayOptions';
+
 
 export default {
-  runHapiWithPlugins: function (server, midwayOptions, callback) {
+  runHapiWithPlugins: async function (server, midwayOptions: MidwayOptions) {
     // Smocks plugin
+    // Logger.info("Midway options: ", midwayOptions);
     server.midwayOptions = midwayOptions;
-    registerMidwayPlugin(server, callback);
+    await registerMidwayPlugin(server);
   }
 };
 
-function registerMidwayPlugin(server, callback) {
-  const smocksPlugin = SmocksHapi.toPlugin({
-    onRegister: function (server, options, next) {
-      return next();
-    }
-  }, server.midwayOptions);
+const swaggerOptions: HapiSwagger.RegisterOptions = {
+  info: {
+    title: 'Midway API Documentation',
+    version: require('./../../package.json').version
+  },
+  documentationPath: '/midway_api_doc'
+};
 
-  smocksPlugin.attributes = {
-    name: 'smocks-plugin'
-  };
+async function registerMidwayPlugin(server) {
+  const smocksPlugin = SmocksHapi.toPlugin(server.midwayOptions);
+  // TODO sgoff: pick up here on name
 
-  const swaggerOpts = {
-    info: {
-      'title': 'Midway API Documentation',
-      'version': require('./../../package.json').version
+  await server.register([
+    {
+      plugin: Inert
     },
-    documentationPath: '/midway_api_doc'
-  };
-  Logger.debug('Swagger opts');
-  Logger.debug(swaggerOpts);
-
-  server.register([smocksPlugin, Inert, {
-    'register': HapiSwagger,
-    'options': swaggerOpts
-  }, Vision], function (err) {
-    if (err) {
-      Logger.error(err);
+    {
+      plugin: Vision
+    },
+    {
+      plugin: smocksPlugin
+    },
+    {
+      plugin: HapiSwagger,
+      options: swaggerOptions
     }
-    try {
-      server.start(function () {
-        const timeTaken = Date.now() - server.midwayOptions.startTime;
-        Logger.debug('Time taken by Midway Server to start:' + timeTaken + ' ms');
-      });
-      if (callback) {
-        return callback(server);
-      }
-    } catch (e) {
-      Logger.error(e);
-      Logger.warn('It\'s possible that the Hapi server Midway is running on has already been started: this will happen if you run Midway as a plugin on an existing server.');
-      return callback(e);
-    }
-  });
+  ]);
 }

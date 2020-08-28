@@ -6,6 +6,7 @@ import SessionInfo from './session-info';
 import StateManager from './../state-manager/state-manager';
 import Constants from '../constants';
 import MidwayRoutesInfo from '../server-routes/midway-routes-info';
+import { MockVariantOptions } from '..';
 
 const sessionState = { 'available': 'AVAILABLE', 'inuse': 'IN_USE', 'invalid': 'DOES_NOT_EXISTS', 'busy': 'NOT_AVAILABLE' };
 const Async = require('async');
@@ -67,23 +68,32 @@ class SessionManager {
           }
         }
 
-        const setMockVariantIterator = function (routeId, next) {
-          const setVariantOptions = {};
-          setVariantOptions[Constants.MOCK_PORT] = Utils.getPortInfo()[Constants.HTTP_PORT];
-          setVariantOptions[Constants.VARIANT] = Constants.DEFAULT_VARIANT;
-          setVariantOptions[Constants.FIXTURE] = routeId;
+        const setMockVariantIterator = async function (routeId, next) {
+          const setVariantOptions: MockVariantOptions = {
+            mockPort: Utils.getPortInfo()[Constants.HTTP_PORT],
+            variant: Constants.DEFAULT_VARIANT,
+            fixture: routeId,
+          };
 
           Logger.debug('Setting default variant for route: ', routeId);
 
-          Utils.setMockVariant(setVariantOptions, function (err) {
-            Logger.debug('Post call done for Set mock variant: ', setVariantOptions);
-            if (err) {
-              Logger.debug(err);
-              return next(err);
+          // Utils.setMockVariant(setVariantOptions, function (err) {
+          //   Logger.debug('Post call done for Set mock variant: ', setVariantOptions);
+          //   if (err) {
+          //     Logger.debug(err);
+          //     return next(err);
 
-            }
-            next();
-          });
+          //   }
+          //   next();
+          // });
+          try {
+            await Utils.setMockVariant(setVariantOptions);
+            Logger.debug('Post call done for Set mock variant: ', setVariantOptions);
+          } catch (err) {
+            Logger.debug(err);
+            return next(err);
+          }
+          next();
         };
 
         const afterAsyncCallBack = function (err) {

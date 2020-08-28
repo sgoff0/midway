@@ -1,0 +1,1 @@
+import './upgrade-mocked-data';

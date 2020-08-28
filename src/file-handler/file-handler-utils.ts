@@ -1,5 +1,6 @@
 import { appRoot } from '../utils/pathHelpers';
 
+import * as _ from 'lodash';
 import * as Path from 'path';
 import * as MimeTypes from 'mime-types';
 import Utils from './../utils/common-utils';
@@ -7,9 +8,13 @@ import * as Logger from 'testarmada-midway-logger';
 import SessionInfo from './../session-manager/session-info';
 const MidwayUtils = require('testarmada-midway-util');
 import * as Fs from 'fs';
+import { FileHandlerInput, FileHandlerOptions } from './file-handler';
 const IsValidPath = require('is-valid-path');
 
 const fileExtensionOrder = ['.json', '.html', '.txt'];
+
+const headersToIgnore = ['Transfer-Encoding'];
+const ignoreRegex = new RegExp(headersToIgnore.join("|"), "i");
 
 class FileHandlerUtils {
   public variables = {
@@ -45,7 +50,7 @@ class FileHandlerUtils {
     this.variables.mimeTypeOfResponse = mimeType;
   };
 
-  public setHeadersAndCookies = (response, options) => {
+  public setHeadersAndCookies = (response, options: FileHandlerOptions) => {
     const responseHeaders = this.setHeaders(response, options.headers);
     const responseCookies = this.setCookies(responseHeaders, options.cookies);
     return responseCookies;
@@ -54,8 +59,12 @@ class FileHandlerUtils {
   public setHeaders = (response, headers) => {
     if (headers !== undefined) {
       for (const key in headers) {
-        Logger.debug('Setting header: ' + key + ' to: ' + headers[key]);
-        response = response.header(key, headers[key]);
+        if (ignoreRegex.test(key)) {
+          Logger.warn(`Ignoring header ${key} as it's known to cause issues`);
+        } else {
+          Logger.debug('Setting header: ' + key + ' to: ' + headers[key]);
+          response = response.header(key, headers[key]);
+        }
       }
     }
     return response;
@@ -89,11 +98,11 @@ class FileHandlerUtils {
     return path;
   };
 
-  public getRouteMethod = (data) => {
+  public getRouteMethod = (data: FileHandlerInput) => {
     return data.route.method();
   };
 
-  public getCodeFromFilePath = (filePath) => {
+  public getCodeFromFilePath = (filePath: string) => {
     let code = filePath.split('.');
     code = code[0].split('-');
     return parseInt(code[code.length - 1]);
@@ -107,7 +116,7 @@ class FileHandlerUtils {
 
   public retrieveFileDataBasedOnPayload = (payload, options) => {
     const appDir = appRoot;
-    console.log("AppDir: ", appDir);
+    // console.log("AppDir: ", appDir);
     // const appDir = global.appRoot;
     let fileData;
     if (IsValidPath(payload)) {
@@ -128,35 +137,37 @@ class FileHandlerUtils {
     return fileData;
   };
 
-  public selectFileFromDirectory = (directory, fileName, callback) => {
-    Utils.readAndFilterDirectory(directory, fileName, function (error, files) {
-      if (error) {
-        return callback(error);
-      }
-      // This is done to remove regex from file name for code specific files
-      let filePath;
-      Logger.debug('files found: ' + files);
-      if (files.length === 0) {
-        if (fileName instanceof RegExp) {
-          fileName = 'DummyFileName';
-        }
+  public selectFileFromDirectory = async (directory, fileName) => {
+    let files;
+    try {
+      files = await Utils.readAndFilterDirectory(directory, fileName);
+    } catch (error) {
+      throw new Error(error);
+    }
 
-        filePath = Path.join(directory, fileName);
-        Logger.warn('No response files found at: ' + filePath);
-        Logger.debug('Setting default extension to .json and file not exists will be handled later');
-        filePath += '.json';
-      } else if (files.length === 1) {
-        filePath = Path.join(directory, files[0]);
-      } else {
-        for (const index in fileExtensionOrder) {
-          if (files.indexOf(fileName + fileExtensionOrder[index]) > -1) {
-            filePath = Path.join(directory, fileName + fileExtensionOrder[index]);
-            break;
-          }
+    // This is done to remove regex from file name for code specific files
+    let filePath;
+    Logger.debug('files found: ' + files);
+    if (files.length === 0) {
+      if (fileName instanceof RegExp) {
+        fileName = 'DummyFileName';
+      }
+
+      filePath = Path.join(directory, fileName);
+      Logger.warn('No response files found at: ' + filePath);
+      Logger.debug('Setting default extension to .json and file not exists will be handled later');
+      filePath += '.json';
+    } else if (files.length === 1) {
+      filePath = Path.join(directory, files[0]);
+    } else {
+      for (const index in fileExtensionOrder) {
+        if (files.indexOf(fileName + fileExtensionOrder[index]) > -1) {
+          filePath = Path.join(directory, fileName + fileExtensionOrder[index]);
+          break;
         }
       }
-      callback(filePath);
-    });
+    }
+    return filePath;
   };
 
   public getNextValue = (data, defaultFileName) => {
