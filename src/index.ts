@@ -110,7 +110,7 @@ export class Midway {
   //   Smocks.plugin(data);
   // }
 
-  public getRoute = (routeId) => {
+  public getRoute = (routeId?) => {
     return Smocks.routes.get(routeId);
   }
 

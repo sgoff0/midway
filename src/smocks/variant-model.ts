@@ -10,7 +10,7 @@ const readFile = util.promisify(fs.readFile);
 
 export interface VariantData {
   // Handler is the user defined handler.  Everything in midway.route(...)
-  id: string,
+  id?: string,
   handler?: (request: Hapi.Request, h: Hapi.ResponseToolkit) => Hapi.Lifecycle.ReturnValue,
   label?: string,
   input?: any,
@@ -26,7 +26,7 @@ class Variant {
   public state;
   public onActivate;
 
-  public constructor(data: VariantData, route: Route) {
+  public constructor(data: VariantData = {}, route: Route) {
     // if (_.isString(data)) {
     //   data = { id: data };
     // }
@@ -138,11 +138,15 @@ class Variant {
   }
 
   public variant = (...args: any[]) => {
-    return this._route.variant.apply(this._route, ...args);
+    // This is for the chaining call of route({...}).variant({...}).variant({...}); that users can pass
+    // Currently the subsequent call isn't working properly
+    // return this._route.variant.apply(this._route, args);
+    return this._route.variant.call(this._route, ...args);
   }
 
   public route = (...args: any[]) => {
-    return this._route.route.apply(this._route, ...args);
+    // return this._route.route.apply(this._route, ...args);
+    return this._route.route.call(this._route, ...args);
   }
 
   // public start = (...args: any[]) => {

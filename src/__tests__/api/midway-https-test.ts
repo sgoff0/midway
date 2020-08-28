@@ -61,8 +61,6 @@ describe('Midway Server', function () {
   });
   it('should read header from endpoint', async () => {
     const result = await request.get('/portal');
-    console.log("Header: ", result.header);
-    console.log("Headers: ", result.headers);
     expect(result.headers['site-id']).toBe('Inet8TSYS');
   });
   it('should filter out problematic headers', async () => {

@@ -32,7 +32,7 @@ class Route {
   private _input;
   private _meta;
   private _variants;
-  private _orderedVariants;
+  public _orderedVariants;
   private _actions;
   private _display;
   private _activeVariant;
@@ -189,7 +189,7 @@ class Route {
     return rtn;
   }
 
-  public getVariant = (id) => {
+  public getVariant = (id?) => {
     const rtn = this._variants[id];
     if (rtn) {
       return rtn;

@@ -4,7 +4,7 @@ import * as Logger from 'testarmada-midway-logger';
 import SessionInfo from './../session-manager/session-info';
 import * as MidwayUtil from 'testarmada-midway-util';
 import Constants from '../constants';
-import ReadMockDataFromFile from '../file-handler/file-handler';
+import ReadMockDataFromFile, { FileHandlerOptions } from '../file-handler/file-handler';
 import * as Hapi from '@hapi/hapi';
 const Rp = require('request-promise');
 let FileHandler;
@@ -24,10 +24,11 @@ const readFile = util.promisify(fs.readFile);
 const readDir = util.promisify(fs.readdir);
 const exists = util.promisify(fs.exists);
 
-interface HandlerOptions {
-  code: number,
-  headers: any,
-}
+// interface HandlerOptions {
+//   code: number,
+//   headers?: Record<string, string>,
+//   filePath?: string,
+// }
 async function makeNetworkCall(name: string, requestOptions, options) {
   // Rp(requestOptions).then(function () {
   //   Logger.debug(`${name} POST Call is successful: `, requestOptions);
@@ -66,7 +67,7 @@ export class CommonUtils {
   /**
    *  Called by user defined/charles generated routes in midway.utils.respondWithFile
    */
-  public respondWithFile = async (route, h: Hapi.ResponseToolkit, options: HandlerOptions) => {
+  public respondWithFile = async (route, h: Hapi.ResponseToolkit, options: FileHandlerOptions) => {
     // if (!this.urlCalls) {
     //   this.urlCalls = {};
     // }

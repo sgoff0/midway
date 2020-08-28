@@ -28,10 +28,10 @@ export interface FileHandlerInput {
 
 export interface FileHandlerOptions {
   code: number;
-  headers: Record<string, string>;
+  headers?: Record<string, string>;
   filePath?: string;
   delay?: number;
-  cookies: any;
+  cookies?: any;
 }
 
 /***

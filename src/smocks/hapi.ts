@@ -58,7 +58,6 @@ export default {
       hapiConnectionOptions = hapiOptions;
     }
     smocksOptions = smocks._sanitizeOptions(smocksOptions || {});
-    console.log(".start Setting smocksOptions.state to smocks", smocksOptions.state);
     smocks.state = smocksOptions.state;
     smocks.initOptions = smocksOptions;
     smocks._sanityCheckRoutes();
@@ -145,7 +144,6 @@ function configServer(server: Hapi.Server) {
             // smocks.plugins.resetInput(request);
             const initialState = JSON.parse(JSON.stringify(smocks.initOptions.initialState || {}));
             smocks.state.resetUserState(request, initialState);
-            console.log("Smocks state: ", smocks.state);
           }
 
           // async function doExecute() {
