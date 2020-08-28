@@ -81,7 +81,7 @@ class Variant {
         }));
         // a specific file name was provided
         try {
-          const stream = await readFile(path);
+          const stream = await readFile(path, 'utf-8');
           const mimeType = mimeTypes.lookup(path);
           return h.response(stream).type(mimeType).code(options.code || 200);
         } catch (err) {

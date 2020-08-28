@@ -89,9 +89,15 @@ export default {
 
 // TODO sgoff0 what does this do? Added in https://github.com/jhudson8/smocks/commit/5a354862a7c98a18d47f114cf7ed30987d7ada10
 // Cors related?
+<<<<<<< HEAD
 function wrapReply(request, reply) {
   const rtn = function () {
     const response = reply.apply(this, arguments);
+=======
+function wrapReply(request, h: Hapi.ResponseToolkit, plugins) {
+  const rtn = function (...args: any[]) {
+    const response = h.response.apply(this, ...args);
+>>>>>>> User endpoint working but gives chunked content error via postman, admin doesn't show user route
     if (smocks.state.onResponse) {
       smocks.state.onResponse(request, response);
     }
@@ -102,9 +108,9 @@ function wrapReply(request, reply) {
     // });
     return response;
   };
-  _.each(['continue', 'file', 'view', 'close', 'proxy', 'redirect'], function (key) {
-    rtn[key] = function () {
-      reply[key].apply(reply, arguments);
+  _.each(['file', 'view', 'close', 'proxy', 'redirect', 'response', 'code'], function (key) {
+    rtn[key] = function (...args: any[]) {
+      h[key].apply(h, ...args);
     };
   });
   return rtn;
@@ -131,15 +137,12 @@ function configServer(server: Hapi.Server) {
         method: route.method(),
         path: route.path(),
         // config: route.config(),
-        handler: function (request, h) {
+        handler: async function (request, h: Hapi.ResponseToolkit) {
           // TODO sgoff0 figure me out
+          // Logger.warn("Temp todo on hapi return");
 
+          // return "Temp TODO";
 
-          Logger.warn("Temp todo on hapi return");
-
-          return "Temp TODO";
-
-          /*
           function doInit() {
             _.each(_routes, function (route) {
               route.resetRouteVariant(request);
@@ -151,36 +154,51 @@ function configServer(server: Hapi.Server) {
             console.log("Smocks state: ", smocks.state);
           }
 
-          function doExecute() {
+          async function doExecute() {
             if (smocks.state.onRequest) {
               smocks.state.onRequest(request, h);
             }
 
-            const pluginIndex = 0;
-            function handlePlugins() {
+            let pluginIndex = 0;
+            async function handlePlugins() {
               // const plugin = _plugins[pluginIndex++];
               // if (plugin) {
+              //   // Thus far this block is false
               //   if (plugin.onRequest) {
-              //     plugin.onRequest.call(smocks._executionContext(request, route, plugin), request, reply, handlePlugins);
+              //     plugin.onRequest.call(smocks._executionContext(request, route, plugin), request, h, handlePlugins);
               //   } else {
               //     handlePlugins();
               //   }
               // } else {
-              reply = wrapReply(request, reply);
-              route._handleRequest.call(route, request, reply);
+              Logger.warn("Not currently wrapping reply (h)");
+              // const wrappedH = wrapReply(request, h, _plugins);
+              // route._handleRequest.call(route, request, wrappedH);
+              // const retVal = await route._handleRequest.call(route, request, h);
+              const retVal = await route._handleRequest(request, h);
+              // return "Message to show";
+              return retVal;
               // }
+              // return "Oops - Fallback message";
             }
 
-            handlePlugins();
+            return handlePlugins();
           }
 
-          smocks.state.initialize(request, function (err, performInitialization) {
-            if (performInitialization) {
-              doInit();
-            }
-            doExecute();
-          });
-          */
+          // Called on request to endpoint such as /portal
+          // Currently only static state is supported, and it's not async
+          const shouldPerformInitialization = smocks.state.initialize(request);
+          if (shouldPerformInitialization) {
+            doInit();
+          }
+          return await doExecute();
+          // smocks.state.initialize(request, function (err, performInitialization) {
+          //   // Only seems to be true the first time
+          //   if (performInitialization) {
+          //     doInit();
+          //   }
+          // });
+
+          // return "TEMP TODO";
         }
       });
     }

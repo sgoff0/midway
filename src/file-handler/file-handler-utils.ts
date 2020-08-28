@@ -128,35 +128,37 @@ class FileHandlerUtils {
     return fileData;
   };
 
-  public selectFileFromDirectory = (directory, fileName, callback) => {
-    Utils.readAndFilterDirectory(directory, fileName, function (error, files) {
-      if (error) {
-        return callback(error);
-      }
-      // This is done to remove regex from file name for code specific files
-      let filePath;
-      Logger.debug('files found: ' + files);
-      if (files.length === 0) {
-        if (fileName instanceof RegExp) {
-          fileName = 'DummyFileName';
-        }
+  public selectFileFromDirectory = async (directory, fileName) => {
+    let files;
+    try {
+      files = await Utils.readAndFilterDirectory(directory, fileName);
+    } catch (error) {
+      throw new Error(error);
+    }
 
-        filePath = Path.join(directory, fileName);
-        Logger.warn('No response files found at: ' + filePath);
-        Logger.debug('Setting default extension to .json and file not exists will be handled later');
-        filePath += '.json';
-      } else if (files.length === 1) {
-        filePath = Path.join(directory, files[0]);
-      } else {
-        for (const index in fileExtensionOrder) {
-          if (files.indexOf(fileName + fileExtensionOrder[index]) > -1) {
-            filePath = Path.join(directory, fileName + fileExtensionOrder[index]);
-            break;
-          }
+    // This is done to remove regex from file name for code specific files
+    let filePath;
+    Logger.debug('files found: ' + files);
+    if (files.length === 0) {
+      if (fileName instanceof RegExp) {
+        fileName = 'DummyFileName';
+      }
+
+      filePath = Path.join(directory, fileName);
+      Logger.warn('No response files found at: ' + filePath);
+      Logger.debug('Setting default extension to .json and file not exists will be handled later');
+      filePath += '.json';
+    } else if (files.length === 1) {
+      filePath = Path.join(directory, files[0]);
+    } else {
+      for (const index in fileExtensionOrder) {
+        if (files.indexOf(fileName + fileExtensionOrder[index]) > -1) {
+          filePath = Path.join(directory, fileName + fileExtensionOrder[index]);
+          break;
         }
       }
-      callback(filePath);
-    });
+    }
+    return filePath;
   };
 
   public getNextValue = (data, defaultFileName) => {

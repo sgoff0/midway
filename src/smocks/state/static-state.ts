@@ -5,11 +5,13 @@ class StaticState {
   public USER_STATE = {};
   public SESSION_VARIANT_STATE = {};
 
-  public initialize = (request, callback) => {
+  public initialize = (request) => {
     console.log("Calaled initialize");
-    const _doInitialize = this.doInitialize;
+    // const _doInitialize = this.doInitialize;
+    const shouldInitializeNow = this.doInitialize;
     this.doInitialize = false;
-    callback(undefined, _doInitialize);
+    return shouldInitializeNow;
+    // callback(undefined, _doInitialize);
   }
 
   public userState = (request) => {

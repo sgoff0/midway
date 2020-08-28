@@ -24,7 +24,7 @@ midway.route({
       Connection: "Keep-alive",
     };
     const code = 200;
-    midway.util.respondWithFile(this, reply, { code, headers });
+    return midway.util.respondWithFile(this, reply, { code, headers });
   },
 });
 

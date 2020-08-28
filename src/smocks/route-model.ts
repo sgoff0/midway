@@ -4,6 +4,22 @@ import Variant from './variant-model';
 import { Smocks } from '.';
 import * as Hapi from '@hapi/hapi';
 
+interface RouteData {
+  // Handler is the user defined handler.  Everything in midway.route(...)
+  handler: (request, h) => void,
+  id: string,
+  label: string,
+  method: string,
+  path: string,
+  display: string,
+  group: string,
+  actions: any,
+  config: any,
+  input: any,
+  meta: any,
+  variantLabel: string,
+}
+
 class Route {
   private _mocker: Smocks;
   private _label: string;
@@ -12,7 +28,7 @@ class Route {
   private _group;
   private _id;
   private _config;
-  private _connection;
+  // private _connection;
   private _input;
   private _meta;
   private _variants;
@@ -23,7 +39,7 @@ class Route {
   private _hasVariants;
   public mockedDirectory: string;
 
-  public constructor(data, mocker: Smocks) {
+  public constructor(data: RouteData, mocker: Smocks) {
     this._mocker = mocker;
     this._label = data.label;
     this._path = data.path;
@@ -31,7 +47,7 @@ class Route {
     this._group = data.group;
     this._id = data.id || this._method + ':' + this._path;
     this._config = data.config;
-    this._connection = data.connection;
+    // this._connection = data.connection;
     this._input = data.input;
     this._meta = data.meta;
     this._variants = {};
@@ -81,9 +97,9 @@ class Route {
     return this._group;
   }
 
-  public connection = () => {
-    return this._connection;
-  }
+  // public connection = () => {
+  //   return this._connection;
+  // }
 
   public path = () => {
     return this._path;
@@ -383,20 +399,21 @@ class Route {
   //   return this._mocker.toHapiPlugin.apply(this._mocker, arguments);
   // }
 
-  public _handleRequest = (request, h: Hapi.ResponseToolkit) => {
+  public _handleRequest = async (request, h: Hapi.ResponseToolkit) => {
     const mocker = this._mocker;
     const variant = this.getActiveVariant(request);
 
     if (variant) {
       if (variant.handler) {
-        return variant.handler.call(executionContext(this, request), request, h);
+        const context = executionContext(this, request);
+        return await variant.handler.call(context, request, h);
       } else {
         Logger.error('no variant handler found for ' + this._path + ':' + variant.id());
         return h.response('no variant handler found for ' + this._path + ':' + variant.id()).code(500);
       }
     } else {
       Logger.error('no selected handler found for ' + this._path);
-      h.response('no selected handler found for ' + this.path).code(500);
+      return h.response('no selected handler found for ' + this.path).code(500);
     }
   }
 

@@ -125,23 +125,26 @@ class Midway {
     return Utils.resetMockId(sessionId);
   }
 
-  public resetMockVariantWithSession = (options, callback) => {
-    Utils.resetMockVariantWithSession(options, (err, result) => {
-      if (err) {
-        return callback(err);
-      }
-      return callback(null, result);
-    });
-  }
+  public resetMockVariantWithSession = Utils.resetMockVariantWithSession;
+  // async (options, callback) => {
+  //   return Utils.rese
+  //   Utils.resetMockVariantWithSession(options, (err, result) => {
+  //     if (err) {
+  //       return callback(err);
+  //     }
+  //     return callback(null, result);
+  //   });
+  // }
 
-  public setMockVariantWithSession = (options, callback) => {
-    Utils.setMockVariantWithSession(options, (err, result) => {
-      if (err) {
-        return callback(err);
-      }
-      return callback(null, result);
-    });
-  }
+  public setMockVariantWithSession = Utils.setMockVariantWithSession;
+  // (options, callback) => {
+  //   Utils.setMockVariantWithSession(options, (err, result) => {
+  //     if (err) {
+  //       return callback(err);
+  //     }
+  //     return callback(null, result);
+  //   });
+  // }
 
   public setMockVariant = (options, callback) => {
     if (!options.mockPort) {

@@ -42,6 +42,7 @@
     {
       "name": "Debug midway caribou server",
       "type": "node",
+      "runtimeVersion": "12.18.3",
       "request": "launch",
       "runtimeVersion": "12.18.3",
       "runtimeExecutable": "node",

@@ -12,6 +12,9 @@ const MidwayUtils = require('testarmada-midway-util');
 import FileUtils from './file-handler-utils';
 import FilePathHelper from './file-path-controller';
 import * as Hapi from '@hapi/hapi';
+import * as util from 'util';
+import * as fs from 'fs';
+const readFile = util.promisify(fs.readFile);
 
 const fileExtensionOrder = ['.json', '.html', '.txt'];
 
@@ -46,39 +49,43 @@ interface Headers {
 /***
  *
  * Provides functionality for retrieving mock data from the filesystem.
- *
+ * Guts of midway.util.respondWithFile
  */
 export default (mockDirectoryPath: string) => {
-  return (data: Data) => {
+  return async (data: Data) => {
+
+    // Logger.debug("Data: ", data);
     // Called when API is hit, likely to read file in realtime
 
-    FilePathHelper.getFilePath(data, mockDirectoryPath, function (filePath) {
-      Logger.debug('Filepath is : ' + filePath);
-      const mimeType = MimeTypes.lookup(filePath);
-      FileUtils.variables.mimeTypeOfResponse = mimeType;
+    const filePath = await FilePathHelper.getFilePath(data, mockDirectoryPath);
+    Logger.debug('Filepath is : ' + filePath);
+    const mimeType = MimeTypes.lookup(filePath);
+    FileUtils.variables.mimeTypeOfResponse = mimeType;
 
-      const fileExtension = Path.extname(filePath);
-      Logger.debug('File extension is ' + fileExtension);
+    const fileExtension = Path.extname(filePath);
+    Logger.debug('File extension is ' + fileExtension);
 
-      if (_.includes(fileExtensionOrder, fileExtension)) {
-        let rawFileData;
+    if (_.includes(fileExtensionOrder, fileExtension)) {
+      let rawFileData;
 
-        try {
-          rawFileData = Fs.readFileSync(filePath, 'utf-8');
-          const fileData = processFileData(rawFileData, mimeType, data);
-          return prepareAndSendResponse(data.h, fileData, data.options.code, data.options, FileUtils.variables.mimeTypeOfResponse);
-        } catch (err) {
-          return handleParsingErrorCases(err, data.h, rawFileData, data, filePath);
-        }
-      } else {
-        Logger.debug('Returning file as response:', filePath);
-        return data.h.file(filePath);
+      try {
+        // rawFileData = Fs.readFileSync(filePath, 'utf-8');
+        rawFileData = await readFile(filePath, 'utf-8');
+        const fileData = processFileData(rawFileData, mimeType, data);
+        Logger.debug("File data: ", fileData);
+        return await prepareAndSendResponse(data.h, fileData, data.options.code, data.options, FileUtils.variables.mimeTypeOfResponse);
+        // return fileData;
+      } catch (err) {
+        return await handleParsingErrorCases(err, data.h, rawFileData, data, filePath);
       }
-    });
+    } else {
+      Logger.debug('Returning file as response:', filePath);
+      return data.h.file(filePath);
+    }
   };
 };
 
-function handleParsingErrorCases(err, h: Hapi.ResponseToolkit, rawFileData, data, filePath) {
+async function handleParsingErrorCases(err, h: Hapi.ResponseToolkit, rawFileData, data, filePath) {
   Logger.warn(err.message);
 
   // Check if json syntax error
@@ -97,7 +104,7 @@ function handleParsingErrorCases(err, h: Hapi.ResponseToolkit, rawFileData, data
   }
 }
 
-function handleJsonFileWithSyntaxError(h: Hapi.ResponseToolkit, rawFileData, data, filePath) {
+async function handleJsonFileWithSyntaxError(h: Hapi.ResponseToolkit, rawFileData, data, filePath) {
   Logger.warn('Invalid syntax in: ' + filePath + ' returning content to client anyway');
   return prepareAndSendResponse(h, rawFileData, data.options.code, data.options, FileUtils.variables.mimeTypeOfResponse);
 }
@@ -127,7 +134,7 @@ function processFileData(fileData, mimeType, data) {
   return fileData;
 }
 
-function prepareAndSendResponse(h: Hapi.ResponseToolkit, body, code = 200, options, mimeType?) {
+async function prepareAndSendResponse(h: Hapi.ResponseToolkit, body, code = 200, options, mimeType?): Promise<any> {
   let response;
   if (mimeType) {
     // Response with specific mimeType
@@ -144,7 +151,12 @@ function prepareAndSendResponse(h: Hapi.ResponseToolkit, body, code = 200, optio
 }
 
 function sendResponse(response, delay) {
-  setTimeout(function () {
-    response.send();
-  }, delay);
+  // setTimeout(function () {
+  //   response.send();
+  // }, delay);
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve(response);
+    }, delay);
+  });
 }
