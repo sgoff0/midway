@@ -435,7 +435,6 @@ class Route {
 }
 
 export default Route;
-// module.exports = Route;
 
 function executionContext(route, request) {
   const variant = route.getActiveVariant(request);

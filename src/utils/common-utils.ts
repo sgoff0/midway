@@ -53,7 +53,7 @@ async function makeNetworkCall(name: string, requestOptions, options) {
   }
 }
 
-class CommonUtils {
+export class CommonUtils {
 
   public initFileHandler = (fileHandler) => {
     FileHandler = fileHandler;
