@@ -11,12 +11,13 @@ import Constants from './../constants';
 const MidwayUtils = require('testarmada-midway-util');
 import FileUtils from './file-handler-utils';
 import FilePathHelper from './file-path-controller';
+import * as Hapi from '@hapi/hapi';
 
 const fileExtensionOrder = ['.json', '.html', '.txt'];
 
 interface Data {
   options: Options;
-  reply: any;
+  h: Hapi.ResponseToolkit;
   route: any;
   variant: any;
 }
@@ -50,7 +51,6 @@ interface Headers {
 export default (mockDirectoryPath: string) => {
   return (data: Data) => {
     // Called when API is hit, likely to read file in realtime
-    const reply = data.reply;
 
     FilePathHelper.getFilePath(data, mockDirectoryPath, function (filePath) {
       Logger.debug('Filepath is : ' + filePath);
@@ -66,24 +66,24 @@ export default (mockDirectoryPath: string) => {
         try {
           rawFileData = Fs.readFileSync(filePath, 'utf-8');
           const fileData = processFileData(rawFileData, mimeType, data);
-          return prepareAndSendResponse(reply, fileData, data.options.code, data.options, FileUtils.variables.mimeTypeOfResponse);
+          return prepareAndSendResponse(data.h, fileData, data.options.code, data.options, FileUtils.variables.mimeTypeOfResponse);
         } catch (err) {
-          return handleParsingErrorCases(err, reply, rawFileData, data, filePath);
+          return handleParsingErrorCases(err, data.h, rawFileData, data, filePath);
         }
       } else {
         Logger.debug('Returning file as response:', filePath);
-        return reply.file(filePath);
+        return data.h.file(filePath);
       }
     });
   };
 };
 
-function handleParsingErrorCases(err, reply, rawFileData, data, filePath) {
+function handleParsingErrorCases(err, h: Hapi.ResponseToolkit, rawFileData, data, filePath) {
   Logger.warn(err.message);
 
   // Check if json syntax error
   if (err instanceof SyntaxError) {
-    return handleJsonFileWithSyntaxError(reply, rawFileData, data, filePath);
+    return handleJsonFileWithSyntaxError(h, rawFileData, data, filePath);
   }
 
   // Update response code if file not found
@@ -91,15 +91,15 @@ function handleParsingErrorCases(err, reply, rawFileData, data, filePath) {
 
   // Respond with the file content even if parsing error occurred
   if (data.options.code) {
-    return prepareAndSendResponse(reply, undefined, data.options.code, data.options);
+    return prepareAndSendResponse(h, undefined, data.options.code, data.options);
   } else {
-    return prepareAndSendResponse(reply, err.message, Constants.NOT_FOUND, data.options);
+    return prepareAndSendResponse(h, err.message, Constants.NOT_FOUND, data.options);
   }
 }
 
-function handleJsonFileWithSyntaxError(reply, rawFileData, data, filePath) {
+function handleJsonFileWithSyntaxError(h: Hapi.ResponseToolkit, rawFileData, data, filePath) {
   Logger.warn('Invalid syntax in: ' + filePath + ' returning content to client anyway');
-  return prepareAndSendResponse(reply, rawFileData, data.options.code, data.options, FileUtils.variables.mimeTypeOfResponse);
+  return prepareAndSendResponse(h, rawFileData, data.options.code, data.options, FileUtils.variables.mimeTypeOfResponse);
 }
 
 function updateCodeIfFileNotFound(err, data, filePath) {
@@ -127,18 +127,17 @@ function processFileData(fileData, mimeType, data) {
   return fileData;
 }
 
-function prepareAndSendResponse(reply, body, code = 200, options, mimeType?) {
+function prepareAndSendResponse(h: Hapi.ResponseToolkit, body, code = 200, options, mimeType?) {
   let response;
-  // var code = code || 200;
   if (mimeType) {
     // Response with specific mimeType
-    response = reply(body).type(mimeType).code(code).hold();
+    response = h.response(body).type(mimeType).code(code);
   } else if (body) {
     // Response with no specific mimeType set
-    response = reply(body).code(code).hold();
+    response = h.response(body).code(code);
   } else {
     // Empty body response mostly 404
-    response = reply().code(code).hold();
+    response = h.response().code(code);
   }
   const res = FileUtils.setHeadersAndCookies(response, options);
   return sendResponse(res, options.delay);

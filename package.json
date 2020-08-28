@@ -27,6 +27,7 @@
     "git-url-parse": "^7.0.0",
     "hapi-swagger": "^14.0.0",
     "is-valid-path": "^0.1.1",
+    "joi": "^17.2.1",
     "lodash": "^4.17.20",
     "mime-types": "^2.1.10",
     "mkdirp": "^1.0.4",

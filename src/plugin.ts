@@ -9,6 +9,8 @@ import MidwayUtils from './utils/common-utils';
 // const MidwayServer = require('./server-controller');
 import MidwayServer from './server-controller';
 import ReadMockDataFromFile from './file-handler/file-handler';
+import * as Logger from 'testarmada-midway-logger';
+
 
 export default {
 
@@ -32,11 +34,13 @@ export default {
     MidwayUtils.initializeSessionURLCallCount();
     MidwayServer.addServerRoutesAndSessions(midwayOptions, midwayOptions.hapiServer);
 
-    const plugin = SmocksHapi.toPlugin(hapiPluginOptions, midwayOptions);
+    Logger.info("Hapi Plugin Options: ", hapiPluginOptions);
+    Logger.info("Midway options: ", midwayOptions);
+    const plugin = SmocksHapi.toPlugin(hapiPluginOptions);
 
-    plugin.attributes = {
-      sessions: midwayOptions.sessions || 0
-    };
+    // plugin.attributes = {
+    //   sessions: midwayOptions.sessions || 0
+    // };
 
     return plugin;
   }

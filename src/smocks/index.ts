@@ -7,7 +7,6 @@ import SessionManager from './admin/api/util/session-manager';
 
 import staticState from './state/static-state';
 
-
 export class Smocks {
   public _id: string;
   private _connection;

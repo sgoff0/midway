@@ -1,3 +1,4 @@
+import * as Hapi from '@hapi/hapi';
 class StaticState {
   public doInitialize = true;
   public ROUTE_STATE = {};
@@ -43,8 +44,8 @@ class StaticState {
     this.SESSION_VARIANT_STATE[key] = payload;
   }
 
-  public onResponse = (request, reply) => {
-    reply.state('__smocks_state', 'static', { encoding: 'none', clearInvalid: true, path: '/' });
+  public onResponse = (request, h: Hapi.ResponseToolkit) => {
+    h.state('__smocks_state', 'static', { encoding: 'none', clearInvalid: true, path: '/' });
   }
 }
 

@@ -10,6 +10,7 @@ import RepoUtil from './multiGitRepo/repo-util';
 import Constants from './constants';
 import Smocks from './smocks/index';
 import * as Logger from 'testarmada-midway-logger';
+import * as Hapi from '@hapi/hapi';
 
 const userRoutes = [];
 const globalVariants = [];
@@ -42,30 +43,36 @@ class Midway {
     return Smocks;
   }
 
-  public start = (options, callback?) => {
+  public start = async (options) => {
     Logger.debug('***************Starting Midway mocking server ***************');
     const midwayOptions = options || {};
 
-    RepoUtil.handleMultipleRepos(midwayOptions).then(() => {
-      midwayOptions.userRoutes = userRoutes;
+    // RepoUtil.handleMultipleRepos(midwayOptions).then(() => {
+    //   midwayOptions.userRoutes = userRoutes;
 
-      MidwayServer.start(midwayOptions, (server) => {
-        this.server = server;
-        if (callback) {
-          return callback(this.server);
-        }
-      });
-    }).catch((err) => {
-      if (callback) {
-        return callback(err);
-      }
-    });
+    //   MidwayServer.start(midwayOptions, (server: Hapi.Server) => {
+    //     this.server = server;
+    //     if (callback) {
+    //       return callback(this.server);
+    //     }
+    //   });
+    // }).catch((err) => {
+    //   if (callback) {
+    //     return callback(err);
+    //   }
+    // });
+    await RepoUtil.handleMultipleRepos(midwayOptions);
+    midwayOptions.userRoutes = userRoutes;
+    const server = await MidwayServer.start(midwayOptions);
+    this.server = server;
+    return server;
+
   }
 
-  public stop = (server, callback?) => {
+  public stop = (server: Hapi.Server, callback?) => {
     Logger.debug('***************Stopping Midway mocking server ***************');
     const serverToStop = server || this.server;
-    MidwayServer.stop(serverToStop, callback);
+    MidwayServer.stop(serverToStop);
   }
 
   public toPlugin = (hapiPluginOptions, options) => {

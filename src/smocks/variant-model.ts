@@ -3,6 +3,10 @@ const mimeTypes = require('mime-types');
 import * as fs from 'fs';
 import * as Path from 'path';
 import Route from './route-model';
+import * as Hapi from '@hapi/hapi';
+import * as util from 'util';
+import Smocks from './index';
+const readFile = util.promisify(fs.readFile);
 
 class Variant {
   private _id;
@@ -60,7 +64,7 @@ class Variant {
   }
 
   public respondWithFile = (options) => {
-    return this.respondWith((request, reply) => {
+    return this.respondWith(async (request, h: Hapi.ResponseToolkit) => {
       options = options || {};
       if (_.isString(options)) {
         options = {
@@ -76,30 +80,30 @@ class Variant {
           return val || match;
         }));
         // a specific file name was provided
-        fs.readFile(path, (err, stream) => {
-          if (err) {
-            if (err.code === 'ENOENT') {
-              // doesn't exist
-              return reply(path + ' not found').code(404);
-            } else {
-              return reply(err);
-            }
-          }
+        try {
+          const stream = await readFile(path);
           const mimeType = mimeTypes.lookup(path);
-          reply(stream).type(mimeType).code(options.code || 200);
-        });
+          return h.response(stream).type(mimeType).code(options.code || 200);
+        } catch (err) {
+          if (err.code === 'ENOENT') {
+            // doesn't exist
+            return h.response(path + ' not found').code(404);
+          } else {
+            return err;
+          }
+        }
       } else {
         // a specific handler must be provided
-        const initOptions = require('./index').initOptions;
+        const initOptions = Smocks.initOptions;
         const handlerFunction = initOptions.respondWithFileHandler;
         if (!handlerFunction) {
-          return reply({
+          return h.response({
             message: 'no file handler function (use smocks "replyWithFileHandler" option)'
           }).code(500);
         }
         handlerFunction({
           request: request,
-          reply: reply,
+          h: h,
           route: this._route,
           variant: this,
           options: options,

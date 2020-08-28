@@ -3,11 +3,12 @@
  */
 import smocks from './index';
 import adminApi from './admin/index';
-import * as Hapi from '@hapi/hapi';
 import * as _ from 'lodash';
 import Route from './route-model';
+import * as Hapi from '@hapi/hapi';
 
-const Logger = require('testarmada-midway-logger');
+// const Logger = require('testarmada-midway-logger');
+import * as Logger from 'testarmada-midway-logger';
 
 const _inputs = {
   boolean: require('./admin/api/input-plugins/checkbox'),
@@ -16,39 +17,33 @@ const _inputs = {
   multiselect: require('./admin/api/input-plugins/multiselect')
 };
 
+const defaultSmocksOptions = {
+  state: undefined,
+};
+
+const defaultHapiPluginOptions = {
+  onRegister: undefined
+};
+
 export default {
-  toPlugin: function (hapiPluginOptions, smocksOptions) {
-    const register: any = function (server, pluginOptions, next) {
-      function _next(err?) {
-        if (err) {
-          next(err);
-        } else {
-          configServer(server);
-          next();
-        }
-      }
+  toPlugin: function (smocksOptions = defaultSmocksOptions) {
+    return {
+      name: 'smocks-plugin',
+      version: '2.0.0',
+      register: function (server, options) {
+        smocks._sanityCheckRoutes();
+        // allow for plugin state override
+        // if (register.overrideState) {
+        //   smocksOptions.state = register.overrideState;
+        // }
+        smocksOptions = smocks._sanitizeOptions(smocksOptions);
+        // deprecate smocks.initOptions in favor of smocks.options
+        smocks.initOptions = smocks.options = smocksOptions;
+        smocks.state = smocksOptions.state;
 
-      hapiPluginOptions = hapiPluginOptions || {};
-      smocksOptions = smocksOptions || {};
-
-      smocks._sanityCheckRoutes();
-      // allow for plugin state override
-      if (register.overrideState) {
-        smocksOptions.state = register.overrideState;
-      }
-      smocksOptions = smocks._sanitizeOptions(smocksOptions);
-      // deprecate smocks.initOptions in favor of smocks.options
-      smocks.initOptions = smocks.options = smocksOptions;
-      console.log(".toPlugin Setting smocksOptions.state to smocks", smocksOptions.state);
-      smocks.state = smocksOptions.state;
-
-      if (hapiPluginOptions.onRegister) {
-        hapiPluginOptions.onRegister(server, pluginOptions, _next);
-      } else {
-        _next();
+        configServer(server);
       }
     };
-    return register;
   },
 
   start: (hapiOptions, smocksOptions) => {
@@ -71,17 +66,13 @@ export default {
     if (!hapiConnectionOptions.routes) {
       hapiConnectionOptions.routes = { cors: true };
     }
-
-    const server = new Hapi.Server(hapiServerOptions);
-    server.connection(hapiConnectionOptions);
+    const server = new Hapi.Server({
+      ...hapiServerOptions,
+      ...hapiConnectionOptions
+    });
 
     configServer(server);
-    server.start(function (err) {
-      if (err) {
-        Logger.error(err.message);
-        process.exit(1);
-      }
-    });
+    server.start();
     Logger.info('started smocks server on ' + hapiConnectionOptions.port + '.  visit http://localhost:' + hapiConnectionOptions.port + '/midway to configure');
 
     return {
@@ -119,7 +110,7 @@ function wrapReply(request, reply) {
   return rtn;
 }
 
-function configServer(server) {
+function configServer(server: Hapi.Server) {
   // set the input types on the smocks object
   smocks.input = function (type, options) {
     _inputs[type] = options;
@@ -136,17 +127,19 @@ function configServer(server) {
   _.each(_routes, (route: Route) => {
     if (route.hasVariants()) {
 
-      let connection = server;
-
-      if (route.connection()) {
-        connection = server.select(route.connection());
-      }
-      connection.route({
+      server.route({
         method: route.method(),
         path: route.path(),
-        config: route.config(),
-        handler: function (request, reply) {
+        // config: route.config(),
+        handler: function (request, h) {
+          // TODO sgoff0 figure me out
 
+
+          Logger.warn("Temp todo on hapi return");
+
+          return "Temp TODO";
+
+          /*
           function doInit() {
             _.each(_routes, function (route) {
               route.resetRouteVariant(request);
@@ -160,7 +153,7 @@ function configServer(server) {
 
           function doExecute() {
             if (smocks.state.onRequest) {
-              smocks.state.onRequest(request, reply);
+              smocks.state.onRequest(request, h);
             }
 
             const pluginIndex = 0;
@@ -187,6 +180,7 @@ function configServer(server) {
             }
             doExecute();
           });
+          */
         }
       });
     }

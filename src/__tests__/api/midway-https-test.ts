@@ -9,24 +9,21 @@ const setMockVariant = util.promisify(midway.setMockVariant);
 describe('Midway Server', function () {
   let myServer;
   let request: SuperTestRequest.SuperTest<SuperTestRequest.Test>;
-  beforeEach((done) => {
+  beforeEach(async (done) => {
     const mockedDirectory = path.join(resourcesPath, 'upgrade-mocked-data');
     // Call this to import all routes
     require(mockedDirectory);
-    midway.start(
+    const server = await midway.start(
       {
         port: 3000,
         // httpsPort: 4444,
         mockedDirectory,
         // sessions: 2,
-      },
-      (server) => {
-        myServer = server;
-        request = SuperTestRequest('http://localhost:3000');
-        done();
-      },
-    );
-  });
+      });
+    myServer = server;
+    request = SuperTestRequest('http://localhost:3000');
+  },
+  );
   afterEach(() => {
     midway.stop(myServer);
   });

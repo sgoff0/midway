@@ -6,17 +6,17 @@ import * as Path from 'path';
 import MidwayUtils from './utils/common-utils';
 import requestHandler from './route-handlers/request-handler';
 import responseHandler from './route-handlers/response-handler';
-const Hapi = require('hapi');
 import * as MidwayServerRoutes from './server-routes/midway-routes-manager';
 import MidwayPluginController from './utils/midway-plugin-controller';
 import * as Logger from 'testarmada-midway-logger';
 import { argv as Argv } from './utils/configuration-parameters';
 import Constants from './constants';
 import ReadMockDataFromFile from './file-handler/file-handler';
+import * as Hapi from '@hapi/hapi';
 
 class ServerController {
 
-  public start = (startOptions, callback) => {
+  public start = async (startOptions) => {
     const midwayOptions = startOptions || {};
     const DEFAULT_MOCK_DIRECTORY = Path.join(process.cwd(), Constants.MIDWAY_DEFAULT_MOCKED_DATA_LOC);
 
@@ -41,31 +41,26 @@ class ServerController {
       Logger.info('Starting midway server on https at https://' + midwayOptions.host + ':' + midwayOptions.httpsPort + '/midway');
     }
 
-    createHapiServer(midwayOptions, (server) => {
-      this.addServerRoutesAndSessions(midwayOptions, server);
-      MidwayUtils.initFileHandler(midwayOptions.respondWithFileHandler);
+    const server = createHapiServer(midwayOptions);
+    this.addServerRoutesAndSessions(midwayOptions, server);
+    MidwayUtils.initFileHandler(midwayOptions.respondWithFileHandler);
+    await MidwayPluginController.runHapiWithPlugins(server, midwayOptions);
 
-      MidwayPluginController.runHapiWithPlugins(server, midwayOptions, callback);
-    });
+    server.start();
+    return server;
   };
 
-  public stop = (server, callback) => {
+  public stop = async (server: Hapi.Server) => {
     MidwayUtils.setServerRunningStatus(false);
-    const options = { timeout: 0 };
-    server.stop(options, (err) => {
-      if (err) {
-        if (callback) {
-          return callback(err);
-        }
-      }
+    try {
+      await server.stop();
       Logger.debug('Midway server stopped');
-      if (callback) {
-        return callback();
-      }
-    });
+    } catch (e) {
+      Logger.error("Error stopping server");
+    }
   };
 
-  public addServerRoutesAndSessions = (midwayOptions, server) => {
+  public addServerRoutesAndSessions = (midwayOptions, server: Hapi.Server) => {
     if (!MidwayUtils.isServerRunning()) {
       MidwayUtils.setServerRunningStatus(true);
       MidwayUtils.setServerProperties(midwayOptions);
@@ -76,19 +71,22 @@ class ServerController {
 
       // Intercept the response here using responseHandler
       if (server) {
-        server.ext('onPostHandler', responseHandler);
+        Logger.warn("Mocked header not being set (TODO)");
+        // TODO sgoff0 why is TS complaining?
+        // server.ext('onPostHandler', responseHandler);
       }
 
+      // TODO sgoff0 should be fine as not using this type of session
       // TODO this needs to be refactored and requestHandler should be generic
       // TODO a request handler specific to session should be added and named differently
-      if (midwayOptions.sessions) {
-        // Intercept the request and response here
-        if (server) {
-          server.ext('onRequest', requestHandler);
-        }
-        // add midway session routes
-        MidwayServerRoutes.addRoutesToSessions(midwayOptions);
-      }
+      // if (midwayOptions.sessions) {
+      //   // Intercept the request and response here
+      //   if (server) {
+      //     server.ext('onRequest', requestHandler);
+      //   }
+      //   // add midway session routes
+      //   MidwayServerRoutes.addRoutesToSessions(midwayOptions);
+      // }
 
       // Initialize URL Call Counts
       MidwayUtils.initializeSessionURLCallCount();
@@ -96,9 +94,11 @@ class ServerController {
   };
 
 }
-function createHapiServer(midwayOptions, callback) {
-  const server = new Hapi.Server();
-  server.connection({ port: midwayOptions.port, labels: 'http' });
-  return callback(server);
+function createHapiServer(midwayOptions) {
+  const server = new Hapi.Server({
+    port: midwayOptions.port,
+  });
+  return server;
+
 }
 export default new ServerController();

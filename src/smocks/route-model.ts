@@ -2,6 +2,7 @@ import * as _ from 'lodash';
 const Logger = require('testarmada-midway-logger');
 import Variant from './variant-model';
 import { Smocks } from '.';
+import * as Hapi from '@hapi/hapi';
 
 class Route {
   private _mocker: Smocks;
@@ -382,21 +383,20 @@ class Route {
   //   return this._mocker.toHapiPlugin.apply(this._mocker, arguments);
   // }
 
-  public _handleRequest = (request, reply) => {
-    const self = this;
+  public _handleRequest = (request, h: Hapi.ResponseToolkit) => {
     const mocker = this._mocker;
     const variant = this.getActiveVariant(request);
 
     if (variant) {
       if (variant.handler) {
-        return variant.handler.call(executionContext(this, request), request, reply);
+        return variant.handler.call(executionContext(this, request), request, h);
       } else {
         Logger.error('no variant handler found for ' + this._path + ':' + variant.id());
-        reply('no variant handler found for ' + this._path + ':' + variant.id()).code(500);
+        return h.response('no variant handler found for ' + this._path + ':' + variant.id()).code(500);
       }
     } else {
       Logger.error('no selected handler found for ' + this._path);
-      reply('no selected handler found for ' + this.path).code(500);
+      h.response('no selected handler found for ' + this.path).code(500);
     }
   }
 
