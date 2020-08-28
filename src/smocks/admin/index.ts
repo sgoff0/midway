@@ -15,6 +15,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as _ from 'lodash';
 import * as util from 'util';
+import { Smocks } from '..';
 const readFile = util.promisify(fs.readFile);
 
 
@@ -28,26 +29,69 @@ const MIME_TYPES = {
   '.woff': 'font/woff'
 };
 
-export default function (server: Hapi.Server, mocker) {
+export default (server: Hapi.Server, smocks: Smocks) => {
 
-  // server.route({
-  //   method: 'GET',
-  //   path: '/_admin',
-  //   handler: ensureInitialized(function (request, h) {
-  //     Logger.info('Received /admin request. Redirecting to /midway');
-  //     h.redirect('/midway');
-  //   })
-  // });
+  function ensureInitialized(func) {
+    return function (request, h: Hapi.ResponseToolkit) {
+      Logger.debug("Ensure initialized");
+      function doInit() {
+        Logger.debug("doInit Admin");
+        _.each(smocks.routes.get(), function (route) {
+          route.resetRouteVariant(request);
+          route.resetSelectedInput(request);
+        });
+        // smocks.plugins.resetInput(request);
+        const initialState = JSON.parse(JSON.stringify(smocks.initOptions.initialState || {}));
+        smocks.state.resetUserState(request, initialState);
+      }
+
+      // Static state init is sequential now
+      const shouldPerformInitialization = smocks.state.initialize(request);
+      if (shouldPerformInitialization) {
+        doInit();
+      }
+      const returnConfig = request.query.returnConfig;
+      return func.call(this, request, h, !!returnConfig);
+    };
+  }
+
+  // TODO sgoff0 what does this do? added in https://github.com/jhudson8/smocks/commit/0ee9dd0340b4b8a278fb9eeaf212b8a2356a02c8
+  // function wrapReply(request, h: Hapi.ResponseToolkit) {
+  //   const rtn = function (payload) {
+  //     const response = h.response.call(this, payload);
+  //     if (smocks.state.onResponse) {
+  //       smocks.state.onResponse(request, response);
+  //     }
+  //     return response;
+  //   };
+  //   rtn.file = function (...args: any[]) {
+  //     const response = h.file.apply(h, ...args);
+  //     if (smocks.state.onResponse) {
+  //       smocks.state.onResponse(request, response);
+  //     }
+  //     return response;
+  //   };
+  //   return rtn;
+  // }
+
+  server.route({
+    method: 'GET',
+    path: '/_admin',
+    handler: ensureInitialized(function (request, h) {
+      Logger.info('Received /admin request. Redirecting to /midway');
+      return h.redirect('/midway');
+    })
+  });
 
   server.route({
     method: 'GET',
     path: '/midway',
-    // handler: ensureInitialized(function (request, h) {
-    handler: async (request, h) => {
+    handler: ensureInitialized(async (request, h) => {
+      // handler: async (request, h) => {
       try {
         const html = await readFile(__dirname + '/config-page.html', { encoding: 'utf8' });
         // const data = {};
-        const data = formatData(mocker, request);
+        const data = formatData(smocks, request);
         const retVal = html.replace('{data}', JSON.stringify(data));
         // reply(html);
         return retVal;;
@@ -55,64 +99,62 @@ export default function (server: Hapi.Server, mocker) {
         console.error("Err: ", err);
         return h.response().code(500);
       }
-    }
+    })
   });
 
-  // server.route({
-  //   method: 'GET',
-  //   path: '/midway-data',
-  //   handler: ensureInitialized(function (request, h) {
-  //     reply = wrapReply(request, h);
-  //     fs.readFile(__dirname + '/config-page.html', { encoding: 'utf8' }, function (err, html) {
-  //       if (err) {
-  //         Logger.error(err);
-  //         reply(err);
-  //       } else {
-  //         const data = formatData(mocker, request);
-  //         reply(data);
-  //       }
-  //     });
-  //   })
-  // });
+  server.route({
+    method: 'GET',
+    path: '/midway-data',
+    handler: ensureInitialized((request, h) => {
+      // const reply = wrapReply(request, h);
+      try {
+        const data = formatData(smocks, request);
+        return data;
+      } catch (err) {
+        Logger.error(err);
+        return err;
+      }
+    })
+  });
 
-  // server.route({
-  //   method: 'POST',
-  //   path: MIDWAY_API_PATH + '/route/{id}',
-  //   handler: ensureInitialized(function (request, h, respondWithConfig) {
-  //     reply = wrapReply(request, h);
-  //     const id = request.params.id;
-  //     const route = mocker.findRoute(id);
-  //     RouteUpdate(route, mocker)(request, h, respondWithConfig);
-  //   })
-  // });
+  server.route({
+    method: 'POST',
+    path: MIDWAY_API_PATH + '/route/{id}',
+    handler: ensureInitialized(function (request, h, respondWithConfig) {
+      // const reply = wrapReply(request, h);
+      const id = request.params.id;
+      const route = smocks.findRoute(id);
+      return RouteUpdate(route, smocks)(request, h, respondWithConfig);
+    })
+  });
 
-  // server.route({
-  //   method: 'POST',
-  //   path: MIDWAY_API_PATH + '/action',
-  //   handler: ensureInitialized(function (request, h, respondWithConfig) {
-  //     reply = wrapReply(request, h);
-  //     const id = request.params.id;
-  //     const route = mocker.findRoute(id);
+  server.route({
+    method: 'POST',
+    path: MIDWAY_API_PATH + '/action',
+    handler: ensureInitialized(function (request, h, respondWithConfig) {
+      // reply = wrapReply(request, h);
+      const id = request.params.id;
+      const route = smocks.findRoute(id);
 
-  //     ExecuteAction(mocker)(request, h, respondWithConfig);
-  //   })
-  // });
+      ExecuteAction(smocks)(request, h, respondWithConfig);
+    })
+  });
 
-  // server.route({
-  //   method: 'POST',
-  //   path: MIDWAY_API_PATH + '/state/reset',
-  //   handler: ensureInitialized(function (request, h, respondWithConfig) {
-  //     reply = wrapReply(request, h);
-  //     ResetState(mocker)(request, h, respondWithConfig);
-  //   })
-  // });
+  server.route({
+    method: 'POST',
+    path: MIDWAY_API_PATH + '/state/reset',
+    handler: ensureInitialized(function (request, h, respondWithConfig) {
+      // reply = wrapReply(request, h);
+      ResetState(smocks)(request, h, respondWithConfig);
+    })
+  });
 
   // server.route({
   //   method: "POST",
   //   path: MIDWAY_API_PATH + "/sessionVariantState/reset",
   //   handler: ensureInitialized(function (request, h, respondWithConfig) {
   //     reply = wrapReply(request, h);
-  //     resetSessionVariantState(mocker)(request, h, respondWithConfig);
+  //     resetSessionVariantState(smocks)(request, h, respondWithConfig);
   //   })
   // });
 
@@ -121,7 +163,7 @@ export default function (server: Hapi.Server, mocker) {
   //   path: MIDWAY_API_PATH + "/sessionVariantState/reset/{key}",
   //   handler: ensureInitialized(function (request, h, respondWithConfig) {
   //     reply = wrapReply(request, h);
-  //     resetSessionVariantStateByKey(mocker)(request, h, respondWithConfig);
+  //     resetSessionVariantStateByKey(smocks)(request, h, respondWithConfig);
   //   })
   // });
 
@@ -130,7 +172,7 @@ export default function (server: Hapi.Server, mocker) {
   //   path: MIDWAY_API_PATH + "/sessionVariantState/set/{key}",
   //   handler: ensureInitialized(function (request, h, respondWithConfig) {
   //     reply = wrapReply(request, h);
-  //     resetSessionVariantStateByKey(mocker)(request, h, respondWithConfig);
+  //     resetSessionVariantStateByKey(smocks)(request, h, respondWithConfig);
   //   })
   // });
 
@@ -140,7 +182,7 @@ export default function (server: Hapi.Server, mocker) {
   //   path: MIDWAY_API_PATH + '/input/reset',
   //   handler: ensureInitialized(function (request, h, respondWithConfig) {
   //     reply = wrapReply(request, h);
-  //     ResetInput(mocker)(request, h, respondWithConfig);
+  //     ResetInput(smocks)(request, h, respondWithConfig);
   //   })
   // });
 
@@ -149,7 +191,7 @@ export default function (server: Hapi.Server, mocker) {
   //   path: MIDWAY_API_PATH + '/global/input/{pluginId}',
   //   handler: ensureInitialized(function (request, h, respondWithConfig) {
   //     reply = wrapReply(request, h);
-  //     GlobalInput(mocker)(request, h, respondWithConfig);
+  //     GlobalInput(smocks)(request, h, respondWithConfig);
   //   })
   // });
 
@@ -158,7 +200,7 @@ export default function (server: Hapi.Server, mocker) {
   //   path: MIDWAY_API_PATH + '/profile',
   //   handler: ensureInitialized(function (request, h, respondWithConfig) {
   //     reply = wrapReply(request, h);
-  //     require('./api/calculate-profile')(mocker)(request, h, respondWithConfig);
+  //     require('./api/calculate-profile')(smocks)(request, h, respondWithConfig);
   //   })
   // });
 
@@ -167,7 +209,7 @@ export default function (server: Hapi.Server, mocker) {
   //   path: MIDWAY_API_PATH + '/profile',
   //   handler: ensureInitialized(function (request, h, respondWithConfig) {
   //     reply = wrapReply(request, h);
-  //     SelectLocalProfile(mocker)(request, h, respondWithConfig);
+  //     SelectLocalProfile(smocks)(request, h, respondWithConfig);
   //   })
   // });
 
@@ -176,7 +218,7 @@ export default function (server: Hapi.Server, mocker) {
   //   path: MIDWAY_API_PATH + '/profile/{name}',
   //   handler: ensureInitialized(function (request, h, respondWithConfig) {
   //     reply = wrapReply(request, h);
-  //     SelectRemoteProfile(mocker)(request, h, respondWithConfig);
+  //     SelectRemoteProfile(smocks)(request, h, respondWithConfig);
   //   })
   // });
 
@@ -185,7 +227,7 @@ export default function (server: Hapi.Server, mocker) {
   //   path: MIDWAY_API_PATH + '/profile/{name}',
   //   handler: ensureInitialized(function (request, h, respondWithConfig) {
   //     reply = wrapReply(request, h);
-  //     SelectRemoteProfile(mocker)(request, h, respondWithConfig);
+  //     SelectRemoteProfile(smocks)(request, h, respondWithConfig);
   //   })
   // });
 
@@ -194,7 +236,7 @@ export default function (server: Hapi.Server, mocker) {
   //   path: MIDWAY_API_PATH + '/proxy',
   //   handler: ensureInitialized(function (request, h, respondWithConfig) {
   //     reply = wrapReply(request, h);
-  //     SetProxy(mocker)(request, h, respondWithConfig);
+  //     SetProxy(smocks)(request, h, respondWithConfig);
   //   })
   // });
 
@@ -232,54 +274,13 @@ export default function (server: Hapi.Server, mocker) {
     method: 'GET',
     path: '/midway/inputs.js',
     handler: function (request, h) {
-      return getInputPlugins(mocker);
+      return getInputPlugins(smocks);
     }
   });
-
-  function ensureInitialized(func) {
-    return function (request, h) {
-
-      function doInit() {
-        _.each(mocker.routes.get(), function (route) {
-          route.resetRouteVariant(request);
-          route.resetSelectedInput(request);
-        });
-        // mocker.plugins.resetInput(request);
-        const initialState = JSON.parse(JSON.stringify(mocker.initOptions.initialState || {}));
-        mocker.state.resetUserState(request, initialState);
-      }
-      mocker.state.initialize(request, function (err, performInitialization) {
-        if (performInitialization) {
-          doInit();
-        }
-        const returnConfig = request.query.returnConfig;
-        func.call(this, request, h, !!returnConfig);
-      });
-    };
-  }
-
-  // TODO sgoff0 what does this do? added in https://github.com/jhudson8/smocks/commit/0ee9dd0340b4b8a278fb9eeaf212b8a2356a02c8
-  // function wrapReply(request, h: Hapi.ResponseToolkit) {
-  //   const rtn = function (payload) {
-  //     const response = h.response.call(this, payload).hold();
-  //     if (mocker.state.onResponse) {
-  //       mocker.state.onResponse(request, response);
-  //     }
-  //     return response.send();
-  //   };
-  //   rtn.file = function () {
-  //     const response = h.response.file.apply(reply, arguments).hold();
-  //     if (mocker.state.onResponse) {
-  //       mocker.state.onResponse(request, response);
-  //     }
-  //     return response.send();
-  //   };
-  //   return rtn;
-  // }
 };
 
-function getInputPlugins(mocker) {
-  const inputs = mocker.inputs.get();
+function getInputPlugins(smocks) {
+  const inputs = smocks.inputs.get();
   let script = '';
   _.each(inputs, function (data, id) {
     script = script + 'input["' + id + '"] = ' + data.ui + '\n';

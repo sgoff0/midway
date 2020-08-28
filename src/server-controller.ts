@@ -13,11 +13,11 @@ import { argv as Argv } from './utils/configuration-parameters';
 import Constants from './constants';
 import ReadMockDataFromFile from './file-handler/file-handler';
 import * as Hapi from '@hapi/hapi';
+import { MidwayOptions } from './types/MidwayOptions';
 
 class ServerController {
 
-  public start = async (startOptions) => {
-    const midwayOptions = startOptions || {};
+  public start = async (midwayOptions: MidwayOptions) => {
     const DEFAULT_MOCK_DIRECTORY = Path.join(process.cwd(), Constants.MIDWAY_DEFAULT_MOCKED_DATA_LOC);
 
     midwayOptions.startTime = new Date();
@@ -42,7 +42,11 @@ class ServerController {
     }
 
     const server = createHapiServer(midwayOptions);
-    this.addServerRoutesAndSessions(midwayOptions, server);
+    Logger.warn("Confirm add server routes is working");
+    // this.addServerRoutesAndSessions(midwayOptions, server);
+    this.addServerRoutesAndSessions(midwayOptions);
+
+    Logger.debug("Init ReadMockDataFromFile");
     MidwayUtils.initFileHandler(midwayOptions.respondWithFileHandler);
     await MidwayPluginController.runHapiWithPlugins(server, midwayOptions);
 
@@ -60,7 +64,7 @@ class ServerController {
     }
   };
 
-  public addServerRoutesAndSessions = (midwayOptions, server: Hapi.Server) => {
+  public addServerRoutesAndSessions = (midwayOptions: MidwayOptions) => {
     if (!MidwayUtils.isServerRunning()) {
       MidwayUtils.setServerRunningStatus(true);
       MidwayUtils.setServerProperties(midwayOptions);
@@ -70,11 +74,11 @@ class ServerController {
       Logger.debug('Sessions to add: ' + midwayOptions.sessions);
 
       // Intercept the response here using responseHandler
-      if (server) {
-        Logger.warn("Mocked header not being set (TODO)");
-        // TODO sgoff0 why is TS complaining?
-        // server.ext('onPostHandler', responseHandler);
-      }
+      // if (server) {
+      //   Logger.warn("Mocked header not being set (TODO)");
+      //   // TODO sgoff0 why is TS complaining?
+      //   // server.ext('onPostHandler', responseHandler);
+      // }
 
       // TODO sgoff0 should be fine as not using this type of session
       // TODO this needs to be refactored and requestHandler should be generic
@@ -94,7 +98,7 @@ class ServerController {
   };
 
 }
-function createHapiServer(midwayOptions) {
+function createHapiServer(midwayOptions: MidwayOptions) {
   const server = new Hapi.Server({
     port: midwayOptions.port,
   });

@@ -3,11 +3,11 @@ import * as Fs from 'fs';
 import FileUtils from './file-handler-utils';
 import Utils from './../utils/common-utils';
 import * as Logger from 'testarmada-midway-logger';
-import { resolve } from 'path';
+import { FileHandlerInput } from './file-handler';
 
 class FilePathController {
 
-  public getFilePath = async (data, base) => {
+  public getFilePath = async (data: FileHandlerInput, base) => {
     const defaultFileName = this.getDefaultFileName(data);
     const nextValue = FileUtils.getNextValue(data, defaultFileName);
     const sessionId = Utils.getSessionId(data);
@@ -97,14 +97,14 @@ class FilePathController {
     return Fs.existsSync(filepath) ? filepath : Path.join(base, filepath);
   };
 
-  public createFilePath = async (data, base) => {
+  public createFilePath = async (data: FileHandlerInput, base) => {
     const routeMethod = FileUtils.getRouteMethod(data);
     const path = Utils.getPathWithoutSessionIdFromData(data);
     const variant = data.variant;
     return await FileUtils.selectFileFromDirectory(Path.join(base, path, routeMethod), (variant.id && variant.id()) || variant);
   };
 
-  public getDefaultFileName = (data) => {
+  public getDefaultFileName = (data: FileHandlerInput) => {
     // Get the filename for the url to respond
     const fileFromPath = Utils.getPathWithoutSessionIdFromData(data).replace(/\//g, '-');
     let defaultFileName = fileFromPath.indexOf('-') === 0 ? fileFromPath.substring(1) : fileFromPath;

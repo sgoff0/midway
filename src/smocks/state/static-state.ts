@@ -1,4 +1,5 @@
 import * as Hapi from '@hapi/hapi';
+import * as Logger from 'testarmada-midway-logger';
 export class StaticState {
   public doInitialize = true;
   public ROUTE_STATE = {};
@@ -6,7 +7,7 @@ export class StaticState {
   public SESSION_VARIANT_STATE = {};
 
   public initialize = (request) => {
-    console.log("Calaled initialize");
+    Logger.debug("Static State Initialize");
     // const _doInitialize = this.doInitialize;
     const shouldInitializeNow = this.doInitialize;
     this.doInitialize = false;
@@ -14,7 +15,7 @@ export class StaticState {
     // callback(undefined, _doInitialize);
   }
 
-  public userState = (request) => {
+  public userState = (request, details?) => {
     return this.USER_STATE;
   }
 

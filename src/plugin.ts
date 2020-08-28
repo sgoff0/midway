@@ -10,11 +10,12 @@ import MidwayUtils from './utils/common-utils';
 import MidwayServer from './server-controller';
 import ReadMockDataFromFile from './file-handler/file-handler';
 import * as Logger from 'testarmada-midway-logger';
+import { MidwayOptions } from './types/MidwayOptions';
 
 
 export default {
 
-  toPlugin: function (hapiPluginOptions, midwayOptions = { mockedDirectory: undefined, respondWithFileHandler: undefined, hapiServer: undefined, sessions: undefined }) {
+  toPlugin: function (hapiPluginOptions, midwayOptions: MidwayOptions) {
 
     // Normally the plugin/magellan is started from the automation directory.
     const mockDir = midwayOptions.mockedDirectory || './mocked-data';
@@ -22,6 +23,7 @@ export default {
     // Midways own plugin
     const fileHandler = ReadMockDataFromFile(Path.join(process.cwd(), mockDir));
     const respondWithFilePlugin = fileHandler;
+    Logger.debug("Init ReadMockDataFromFile");
     MidwayUtils.initFileHandler(fileHandler);
 
     // Use this the same way as we do in start.js
@@ -32,7 +34,7 @@ export default {
 
     // Initialize URL Call Counts for setMockId
     MidwayUtils.initializeSessionURLCallCount();
-    MidwayServer.addServerRoutesAndSessions(midwayOptions, midwayOptions.hapiServer);
+    MidwayServer.addServerRoutesAndSessions(midwayOptions);
 
     Logger.info("Hapi Plugin Options: ", hapiPluginOptions);
     Logger.info("Midway options: ", midwayOptions);

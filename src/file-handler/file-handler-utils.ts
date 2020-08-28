@@ -7,6 +7,7 @@ import * as Logger from 'testarmada-midway-logger';
 import SessionInfo from './../session-manager/session-info';
 const MidwayUtils = require('testarmada-midway-util');
 import * as Fs from 'fs';
+import { FileHandlerInput } from './file-handler';
 const IsValidPath = require('is-valid-path');
 
 const fileExtensionOrder = ['.json', '.html', '.txt'];
@@ -89,11 +90,11 @@ class FileHandlerUtils {
     return path;
   };
 
-  public getRouteMethod = (data) => {
+  public getRouteMethod = (data: FileHandlerInput) => {
     return data.route.method();
   };
 
-  public getCodeFromFilePath = (filePath) => {
+  public getCodeFromFilePath = (filePath: string) => {
     let code = filePath.split('.');
     code = code[0].split('-');
     return parseInt(code[code.length - 1]);

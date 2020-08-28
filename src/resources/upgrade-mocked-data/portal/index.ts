@@ -5,7 +5,7 @@ midway.route({
   label: "/portal",
   path: "/portal",
   method: "GET",
-  handler(req, reply) {
+  handler(req, h) {
     const headers = {
       Date: "Wed, 03 Apr 2019 19:39:25 GMT",
       "Strict-Transport-Security":
@@ -24,7 +24,8 @@ midway.route({
       Connection: "Keep-alive",
     };
     const code = 200;
-    return midway.util.respondWithFile(this, reply, { code, headers });
+
+    return midway.util.respondWithFile(this, h, { code, headers });
   },
 });
 
@@ -37,17 +38,17 @@ midway
     label: "/portal",
     path: "/portal",
     method: "POST",
-    handler(req, reply) {
+    handler(req, h) {
       const headers = {};
       const code = 200;
-      midway.util.respondWithFile(this, reply, { code, headers });
+      return midway.util.respondWithFile(this, h, { code, headers });
     },
   })
   .variant({
     id: "Bank-OOB",
     label: "Bank-OOB",
-    handler(req, reply) {
-      midway.util.respondWithFile(this, reply, {
+    handler(req, h) {
+      return midway.util.respondWithFile(this, h, {
         code: 401,
         headers: {
           "WWW-Authenticate": 'BankSA realm="mapi.discoverbank.com"',

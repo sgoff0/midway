@@ -11,11 +11,13 @@ import Constants from './constants';
 import Smocks from './smocks/index';
 import * as Logger from 'testarmada-midway-logger';
 import * as Hapi from '@hapi/hapi';
+import { RouteData } from './smocks/route-model';
+import { MidwayOptions } from './types/MidwayOptions';
 
 const userRoutes = [];
 const globalVariants = [];
 
-class Midway {
+export class Midway {
 
   public server;
 
@@ -43,10 +45,8 @@ class Midway {
     return Smocks;
   }
 
-  public start = async (options) => {
+  public start = async (midwayOptions: MidwayOptions): Promise<Hapi.Server> => {
     Logger.debug('***************Starting Midway mocking server ***************');
-    const midwayOptions = options || {};
-
     // RepoUtil.handleMultipleRepos(midwayOptions).then(() => {
     //   midwayOptions.userRoutes = userRoutes;
 
@@ -69,7 +69,7 @@ class Midway {
 
   }
 
-  public stop = (server: Hapi.Server, callback?) => {
+  public stop = (server: Hapi.Server) => {
     Logger.debug('***************Stopping Midway mocking server ***************');
     const serverToStop = server || this.server;
     MidwayServer.stop(serverToStop);
@@ -81,7 +81,7 @@ class Midway {
     return Plugin.toPlugin(hapiPluginOptions, smocksOptions);
   }
 
-  public route = (data) => {
+  public route = (data: RouteData) => {
     Logger.debug('Routes.....');
     Logger.debug(JSON.stringify(data, null, 2));
 

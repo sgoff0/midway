@@ -4,10 +4,11 @@ const Logger = require('testarmada-midway-logger');
 import * as _ from 'lodash';
 import { Smocks } from '../..';
 import Route from '../../route-model';
+import * as Hapi from '@hapi/hapi';
 
 export default function (route: Route, mocker: Smocks) {
 
-  return function (request, reply, respondWithConfig) {
+  return function (request, h: Hapi.ResponseToolkit, respondWithConfig) {
     const payload = request.payload;
     const variantId = payload.variant;
     const input = payload.input;
@@ -26,19 +27,21 @@ export default function (route: Route, mocker: Smocks) {
         });
       }
     }
-    selectVariant(reply, route, variantId, request);
+    Logger.warn("Address me, not fully implemented");
+    const variant = selectVariant(h, route, variantId, request);
     if (input) {
       copyProperties(input, route, request);
     }
-    reply(respondWithConfig ? formatData(mocker, request) : {});
+    return (respondWithConfig ? formatData(mocker, request) : {});
   };
 };
 
-function selectVariant(reply, route, variantId, request) {
+function selectVariant(h: Hapi.ResponseToolkit, route, variantId, request) {
   const returnObj = route.selectVariant(variantId, request);
-  if (returnObj) {
-    reply(returnObj);
-  }
+  return returnObj;
+  // if (returnObj) {
+  //   reply(returnObj);
+  // }
 }
 
 function copyProperties(input, route, request) {

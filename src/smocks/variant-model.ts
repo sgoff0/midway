@@ -2,12 +2,20 @@ import * as _ from 'lodash';
 const mimeTypes = require('mime-types');
 import * as fs from 'fs';
 import * as Path from 'path';
-import Route from './route-model';
+import Route, { RouteData } from './route-model';
 import * as Hapi from '@hapi/hapi';
 import * as util from 'util';
 import Smocks from './index';
 const readFile = util.promisify(fs.readFile);
 
+export interface VariantData {
+  // Handler is the user defined handler.  Everything in midway.route(...)
+  id: string,
+  handler?: (request: Hapi.Request, h: Hapi.ResponseToolkit) => Hapi.Lifecycle.ReturnValue,
+  label?: string,
+  input?: any,
+  appliesToRoute?: any,
+}
 class Variant {
   private _id;
   private _label;
@@ -18,10 +26,10 @@ class Variant {
   public state;
   public onActivate;
 
-  public constructor(data, route: Route) {
-    if (_.isString(data)) {
-      data = { id: data };
-    }
+  public constructor(data: VariantData, route: Route) {
+    // if (_.isString(data)) {
+    //   data = { id: data };
+    // }
     this._id = data.id || 'default';
     this._label = data.label;
     this.handler = data.handler;

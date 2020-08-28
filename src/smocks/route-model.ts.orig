@@ -1,23 +1,23 @@
 import * as _ from 'lodash';
 const Logger = require('testarmada-midway-logger');
-import Variant, { VariantData } from './variant-model';
+import Variant from './variant-model';
 import { Smocks } from '.';
 import * as Hapi from '@hapi/hapi';
 
-export interface RouteData {
+interface RouteData {
   // Handler is the user defined handler.  Everything in midway.route(...)
-  handler: (request: Hapi.Request, h: Hapi.ResponseToolkit) => Hapi.Lifecycle.ReturnValue,
+  handler: (request, h) => void,
   id: string,
   label: string,
   method: string,
   path: string,
-  display?: string,
-  group?: string,
-  actions?: any,
-  config?: any,
-  input?: any,
-  meta?: any,
-  variantLabel?: string,
+  display: string,
+  group: string,
+  actions: any,
+  config: any,
+  input: any,
+  meta: any,
+  variantLabel: string,
 }
 
 class Route {
@@ -160,7 +160,7 @@ class Route {
     });
   }
 
-  public variant = (data: VariantData) => {
+  public variant = (data) => {
     const variant = new Variant(data, this);
     this._variants[variant.id()] = variant;
     this._orderedVariants.push(variant);
@@ -241,12 +241,12 @@ class Route {
   // }
 
   public respondWith = (responder) => {
-    const variant = this.variant({ id: 'default' });
+    const variant = this.variant('default');
     return variant.respondWith(responder);
   }
 
   public respondWithFile = (options) => {
-    const variant = this.variant({ id: 'default' });
+    const variant = this.variant('default');
     return variant.respondWithFile(options);
   }
 
@@ -310,7 +310,6 @@ class Route {
   }
 
   public resetSelectedInput = (request) => {
-    Logger.debug("Reset Selected Input");
     let rootInput = this._mocker.state.routeState(request)[this.id()];
     if (!rootInput) {
       this._mocker.state.routeState(request)[this.id()] = {};
@@ -363,6 +362,13 @@ class Route {
     return variantInput[id];
   }
 
+<<<<<<< HEAD
+  public selectedVariantInput = (variant, request) => {
+    const smocksState = this._mocker.state;
+    const smocksRouteState = smocksState.routeState(request);
+    const routeIdState = smocksRouteState[this._id];
+    let input = routeIdState._variantInput;
+=======
   public selectedVariantInput = (variant: Variant, request: Hapi.Request) => {
     const smocksState = this._mocker.state;
     // TODO sgoff0 first read files
@@ -370,6 +376,7 @@ class Route {
     const smocksRouteState = smocksState.routeState(request);
     const routeIdState = smocksRouteState[this._id];
     let input = routeIdState?._variantInput;
+>>>>>>> WIP
     // let input = this._mocker.state.routeState(request)[this.id()]._variantInput;
     if (!input) {
       input = this._mocker.state.routeState(request)[this.id()]._variantInput = {};

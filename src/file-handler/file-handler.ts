@@ -1,7 +1,6 @@
 /**
  * Read filesystem and reply with response
  */
-import * as Fs from 'fs';
 import * as Path from 'path';
 import * as MimeTypes from 'mime-types';
 import Utils from './../utils/common-utils';
@@ -14,20 +13,23 @@ import FilePathHelper from './file-path-controller';
 import * as Hapi from '@hapi/hapi';
 import * as util from 'util';
 import * as fs from 'fs';
+import Route from '../smocks/route-model';
+import Variant from '../smocks/variant-model';
 const readFile = util.promisify(fs.readFile);
 
 const fileExtensionOrder = ['.json', '.html', '.txt'];
 
-interface Data {
+export interface FileHandlerInput {
   options: Options;
   h: Hapi.ResponseToolkit;
-  route: any;
-  variant: any;
+  route: Route;
+  variant: Variant;
 }
 
 interface Options {
   code: number;
   headers: Headers;
+  filePath?: string;
 }
 
 interface Headers {
@@ -52,7 +54,7 @@ interface Headers {
  * Guts of midway.util.respondWithFile
  */
 export default (mockDirectoryPath: string) => {
-  return async (data: Data) => {
+  return async (data: FileHandlerInput) => {
 
     // Logger.debug("Data: ", data);
     // Called when API is hit, likely to read file in realtime
