@@ -161,7 +161,7 @@ export class Smocks {
     }
   }
 
-  public route(data) {
+  public route(data): Route {
     if (!data.path) {
       throw new Error('Routes must be in the form of {path: "...", method: "..."}');
     } else {

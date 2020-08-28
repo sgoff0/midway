@@ -20,6 +20,7 @@ class Route {
   private _display;
   private _activeVariant;
   private _hasVariants;
+  public mockedDirectory: string;
 
   public constructor(data, mocker: Smocks) {
     this._mocker = mocker;
