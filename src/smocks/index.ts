@@ -17,6 +17,8 @@ const Variant = require('./variant-model');
 // const Plugin = require('./plugin-model');
 const SessionManager = require('./admin/api/util/session-manager');
 
+import staticState from './state/static-state';
+
 class Smocks {
   public _id: string;
   private _connection;
@@ -293,17 +295,8 @@ class Smocks {
 
   public _sanitizeOptions(options) {
     options = _.clone(options || {});
-    if (options.state) {
-      if (options.state === 'static') {
-        options.state = require('./state/static-state');
-      }
-      if (!options.state.initialize) {
-        Logger.error('state handler *must* implement "initialize" method: ', options.state);
-        process.exit(1);
-      }
-    } else {
-      options.state = require('./state/static-state');
-    }
+    // always use static state
+    options.state = staticState;
 
     return options;
   }
