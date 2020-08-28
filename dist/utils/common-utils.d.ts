@@ -1,0 +1,45 @@
+import { FileHandlerOptions } from '../file-handler/file-handler';
+import * as Hapi from '@hapi/hapi';
+export declare class CommonUtils {
+    initFileHandler: (fileHandler: any) => void;
+    initProxyApi: (proxyApi: any) => void;
+    respondWithFile: (route: any, h: Hapi.ResponseToolkit, options: FileHandlerOptions) => Promise<any>;
+    respondWithMockVariant: (route: any, variant: any, req: any, h: Hapi.ResponseToolkit) => any;
+    getSessionMockIds: () => {
+        default: any;
+    };
+    getSessionURLCallCount: () => {};
+    initializeSessionURLCallCount: () => void;
+    isServerRunning: () => boolean;
+    setServerRunningStatus: (status: any) => void;
+    killProcess: (pid: any, signal: any, callback: any) => any;
+    substituteData: (object: any, valueToSubstitute: any) => any;
+    writeFile: (fileLocation: any, fileData: any, callback: any) => void;
+    deleteFile: (filePath: any, callback: any) => void;
+    readJsonFile: (fileLocation: any) => any;
+    transposeData: (object: any, valueToSubstitute: any) => any;
+    readDirectory: (dirLocation: any) => Promise<string[]>;
+    readAndFilterDirectory: (dirLocation: any, fileName: any) => Promise<any>;
+    readFile: (fileLocation: any) => Promise<string>;
+    checkDirectoryExists: (dirLocation: any) => boolean;
+    checkFileExists: (fileLocation: any) => Promise<boolean>;
+    setMockId: (mockId: any, sessionId: any) => void;
+    getMockId: (sessionId: any) => any;
+    resetMockVariantWithSession: (options: any) => Promise<void>;
+    setMockVariantWithSession: (options: any) => Promise<void>;
+    setMockVariant: (options: any, callback: any) => Promise<any>;
+    resetMockId: (sessionId: any) => void;
+    resetURLCount: (sessionId: any) => void;
+    getURLCount: (sessionId: any) => any;
+    checkIfCertsExists: (keyFile: any, certFile: any) => boolean;
+    setServerProperties: (options: any) => void;
+    setHttpPort: (httpPort: any) => void;
+    getProjectName: () => any;
+    getPortInfo: () => {};
+    getPathWithoutSessionId: (path: any) => any;
+    getPathWithoutSessionIdFromData: (data: any) => any;
+    getPath: (data: any) => any;
+    getSessionId: (data: any) => string;
+}
+declare const _default: CommonUtils;
+export default _default;
