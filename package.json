@@ -1,5 +1,5 @@
 {
-  "name": "midway",
+  "name": "testarmada-midway",
   "version": "2.0.0",
   "description": "Mocking server to create reliable test data for test execution and development",
   "main": "dist/index.js",
