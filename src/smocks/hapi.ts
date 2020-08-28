@@ -10,11 +10,16 @@ import * as Hapi from '@hapi/hapi';
 // const Logger = require('testarmada-midway-logger');
 import * as Logger from 'testarmada-midway-logger';
 
+import boolean from './admin/api/input-plugins/checkbox';
+import text from './admin/api/input-plugins/text';
+import select from './admin/api/input-plugins/select';
+import multiselect  from './admin/api/input-plugins/multiselect';
+
 const _inputs = {
-  boolean: require('./admin/api/input-plugins/checkbox'),
-  text: require('./admin/api/input-plugins/text'),
-  select: require('./admin/api/input-plugins/select'),
-  multiselect: require('./admin/api/input-plugins/multiselect')
+  boolean,
+  text,
+  select,
+  multiselect
 };
 
 const defaultSmocksOptions = {
@@ -120,7 +125,7 @@ function configServer(server: Hapi.Server) {
     }
   };
 
-  const _routes = smocks.routes.get();
+  const _routes = smocks.routes.get() as Route[];
   // const _plugins = smocks.plugins.get();
 
   _.each(_routes, (route: Route) => {

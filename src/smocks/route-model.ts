@@ -4,20 +4,36 @@ import Variant, { VariantData } from './variant-model';
 import { Smocks } from '.';
 import * as Hapi from '@hapi/hapi';
 
-export interface RouteData {
-  // Handler is the user defined handler.  Everything in midway.route(...)
-  handler: (request: Hapi.Request, h: Hapi.ResponseToolkit) => Hapi.Lifecycle.ReturnValue,
-  id: string,
+export interface Input {
   label: string,
-  method: string,
+  type: 'text' | 'boolean' | 'select' | 'multiselect',
+  defaultValue: any,
+}
+export interface RouteData {
+  // Unique route id
+  id: string,
+  // Description of the route
+  label: string,
+  // Path of the route
   path: string,
-  display?: string,
-  group?: string,
-  actions?: any,
-  config?: any,
-  input?: any,
-  meta?: any,
+  // HTTP Method
+  method: string,
+  // Function which handles the request for the path (Hapi handler function)
+  handler: (request: Hapi.Request, h: Hapi.ResponseToolkit) => Hapi.Lifecycle.ReturnValue,
+  // Displayed in admin UI instead of the variant id (e.g. instead of default or some-variant)
   variantLabel?: string,
+  // Shows in admin ui under variants in a "Fixture specific details" section
+  display?: () => string,
+  // Shows a tab in Admin UI to filter endpoints of this group
+  group?: string,
+  // Displays custom buttons in an action panel of route in admin UI.  I don't know what stucture should be
+  actions?: any,
+  // Looks like it had things like cors header info and tags
+  config?: any,
+  // Add custom input to admin UI which can drive handler behavior
+  input?: Record<string, Input>,
+  // Not sure, no visual impact
+  meta?: any,
 }
 
 class Route {

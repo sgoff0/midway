@@ -38,6 +38,20 @@ midway
     label: "/portal",
     path: "/portal",
     method: "POST",
+    // variantLabel: "I am a variant label",
+    // actions: ['a', 'b'],
+    input: {
+      person: {
+        label: 'Name',
+        type: 'text',
+        defaultValue: 'Daniel'
+      },
+      hobby: {
+        label: 'Do you like sports',
+        type: 'boolean',
+        defaultValue: 'true'
+      }
+    },
     handler(req, h) {
       const headers = {};
       const code = 200;

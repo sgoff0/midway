@@ -2,17 +2,24 @@ import * as _ from 'lodash';
 const mimeTypes = require('mime-types');
 import * as fs from 'fs';
 import * as Path from 'path';
-import Route, { RouteData } from './route-model';
+import Route from './route-model';
 import * as Hapi from '@hapi/hapi';
 import * as util from 'util';
 import Smocks from './index';
 const readFile = util.promisify(fs.readFile);
 
+/**
+ * Variants allows to return a different data set for a given mocked route. 
+ * Variants can be selected in the admin UI to determine what type of response a route should have. 
+ * Routes are defined using the variant method on the Route object (returned by calling the route method). 
+ */
 export interface VariantData {
-  // Handler is the user defined handler.  Everything in midway.route(...)
+  // the variant id - used for the RESTful admin API and profile settings
   id?: string,
-  handler?: (request: Hapi.Request, h: Hapi.ResponseToolkit) => Hapi.Lifecycle.ReturnValue,
+  // the variant label - used for display on the admin panel
   label?: string,
+  // the HAPI route handler which provides the route response
+  handler?: (request: Hapi.Request, h: Hapi.ResponseToolkit) => Hapi.Lifecycle.ReturnValue,
   input?: any,
   appliesToRoute?: any,
 }

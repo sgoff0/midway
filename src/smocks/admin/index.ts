@@ -17,6 +17,7 @@ import * as _ from 'lodash';
 import * as util from 'util';
 import { Smocks } from '..';
 import setSessionVariantStateByKey from './api/set-session-variant-state-by-key';
+import Route from '../route-model';
 const readFile = util.promisify(fs.readFile);
 
 
@@ -37,7 +38,7 @@ export default (server: Hapi.Server, smocks: Smocks) => {
       Logger.debug("Ensure initialized");
       function doInit() {
         Logger.debug("doInit Admin");
-        _.each(smocks.routes.get(), function (route) {
+        _.each(smocks.routes.get() as Route[], function (route) {
           route.resetRouteVariant(request);
           route.resetSelectedInput(request);
         });

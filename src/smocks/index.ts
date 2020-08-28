@@ -32,11 +32,11 @@ export class Smocks {
   // }
 
   public routes = {
-    get: (id?) => {
+    get: (id?: string): Route | Route[] => {
       if (!id) {
         return this._routes;
       }
-      return _.filter(this._routes, route => route._id === id);
+      return _.find(this._routes, route => route._id === id);
       // for (let i = 0; i < this._routes.length; i++) {
       //   if (this._routes[i].id() === id) {
       //     return this._routes[i];
