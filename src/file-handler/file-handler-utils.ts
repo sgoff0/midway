@@ -47,6 +47,7 @@ class FileHandlerUtils {
   };
 
   public setHeadersAndCookies = (response, options) => {
+    Logger.error("This method is setting content-type on chuncked replies which causes errors");
     const responseHeaders = this.setHeaders(response, options.headers);
     const responseCookies = this.setCookies(responseHeaders, options.cookies);
     return responseCookies;

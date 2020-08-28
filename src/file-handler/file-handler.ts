@@ -148,14 +148,12 @@ async function prepareAndSendResponse(h: Hapi.ResponseToolkit, body, code = 200,
     // Empty body response mostly 404
     response = h.response().code(code);
   }
-  const res = FileUtils.setHeadersAndCookies(response, options);
-  return sendResponse(res, options.delay);
+  Logger.warn("Skipping setting headers and cookies call");
+  // const res = FileUtils.setHeadersAndCookies(response, options);
+  return sendResponse(response, options.delay);
 }
 
 function sendResponse(response, delay) {
-  // setTimeout(function () {
-  //   response.send();
-  // }, delay);
   return new Promise(resolve => {
     setTimeout(() => {
       resolve(response);
