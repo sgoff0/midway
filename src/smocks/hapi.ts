@@ -89,15 +89,9 @@ export default {
 
 // TODO sgoff0 what does this do? Added in https://github.com/jhudson8/smocks/commit/5a354862a7c98a18d47f114cf7ed30987d7ada10
 // Cors related?
-<<<<<<< HEAD
-function wrapReply(request, reply) {
-  const rtn = function () {
-    const response = reply.apply(this, arguments);
-=======
-function wrapReply(request, h: Hapi.ResponseToolkit, plugins) {
+function wrapReply(request, h: Hapi.ResponseToolkit) {
   const rtn = function (...args: any[]) {
     const response = h.response.apply(this, ...args);
->>>>>>> User endpoint working but gives chunked content error via postman, admin doesn't show user route
     if (smocks.state.onResponse) {
       smocks.state.onResponse(request, response);
     }
@@ -132,7 +126,6 @@ function configServer(server: Hapi.Server) {
 
   _.each(_routes, (route: Route) => {
     if (route.hasVariants()) {
-
       server.route({
         method: route.method(),
         path: route.path(),
@@ -155,11 +148,12 @@ function configServer(server: Hapi.Server) {
           }
 
           async function doExecute() {
-            if (smocks.state.onRequest) {
-              smocks.state.onRequest(request, h);
-            }
+            // Static state doens't have this
+            // if (smocks.state.onRequest) {
+            //   smocks.state.onRequest(request, h);
+            // }
 
-            let pluginIndex = 0;
+            const pluginIndex = 0;
             async function handlePlugins() {
               // const plugin = _plugins[pluginIndex++];
               // if (plugin) {
@@ -203,6 +197,8 @@ function configServer(server: Hapi.Server) {
       });
     }
   });
+
+  // console.log("Route state: ", smocks.state.ROUTE_STATE);
 
   adminApi(server, smocks);
 }

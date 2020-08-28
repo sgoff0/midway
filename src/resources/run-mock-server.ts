@@ -21,7 +21,7 @@ function timeout(ms) {
 async function main() {
     const mockedDirectory = path.join(resourcesPath, 'upgrade-mocked-data');
     midway.start({
-        port: 8000,
+        port: 8001,
         mockedDirectory,
     });
 

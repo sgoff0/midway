@@ -1,6 +1,9 @@
 import * as _ from 'lodash';
+import { Smocks } from '../..';
+import * as Hapi from '@hapi/hapi';
+import Route from '../../route-model';
 
-function formatData(mocker, request) {
+function formatData(mocker: Smocks, request: Hapi.Request) {
   return {
     id: mocker.id(),
     routes: formatRoutes(mocker, request),
@@ -13,7 +16,7 @@ function formatData(mocker, request) {
   };
 }
 
-function formatProfiles(mocker) {
+function formatProfiles(mocker: Smocks) {
   const rtn = [];
   const profiles = mocker.profiles.get();
   _.each(profiles, function (data, id) {
@@ -22,7 +25,7 @@ function formatProfiles(mocker) {
   return rtn;
 }
 
-// function formatPluginInput(mocker) {
+// function formatPluginInput(mocker: Smocks) {
 //   const rtn = [];
 //   const plugins = mocker.plugins.get();
 //   _.each(plugins, function (plugin) {
@@ -36,9 +39,9 @@ function formatProfiles(mocker) {
 //   return rtn;
 // }
 
-function formatRoutes(mocker, request) {
+function formatRoutes(mocker: Smocks, request) {
   const routes = mocker.routes.get();
-  return _.compact(_.map(routes, function (route) {
+  return _.compact(_.map(routes, function (route: Route) {
     if (!route.hasVariants()) {
       return undefined;
     }
@@ -59,7 +62,7 @@ function formatRoutes(mocker, request) {
   }));
 }
 
-function formatSelections(route, request) {
+function formatSelections(route, request: Smocks) {
   const variantSelections = {};
   _.each(route.variants(), function (variant) {
     const input = route.selectedVariantInput(variant, request);

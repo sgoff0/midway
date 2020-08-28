@@ -1,5 +1,5 @@
 import * as Hapi from '@hapi/hapi';
-class StaticState {
+export class StaticState {
   public doInitialize = true;
   public ROUTE_STATE = {};
   public USER_STATE = {};

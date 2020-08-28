@@ -26,7 +26,7 @@ class Route {
   public _path: string;
   public _method: string;
   private _group;
-  private _id;
+  public _id;
   private _config;
   // private _connection;
   private _input;
@@ -132,12 +132,12 @@ class Route {
     }
   }
 
-  public label = (label) => {
+  public label = (label?) => {
     if (!label) {
       return this._label;
     }
     this._label = label;
-    return this;
+    return label;
   }
 
   public applyProfile = (profile, request) => {
@@ -362,11 +362,13 @@ class Route {
     return variantInput[id];
   }
 
-  public selectedVariantInput = (variant, request) => {
+  public selectedVariantInput = (variant: Variant, request: Hapi.Request) => {
     const smocksState = this._mocker.state;
+    // TODO sgoff0 first read files
+    Logger.warn("Routes not yet loaded from file, make sure they are being read then this may work");
     const smocksRouteState = smocksState.routeState(request);
     const routeIdState = smocksRouteState[this._id];
-    let input = routeIdState._variantInput;
+    let input = routeIdState?._variantInput;
     // let input = this._mocker.state.routeState(request)[this.id()]._variantInput;
     if (!input) {
       input = this._mocker.state.routeState(request)[this.id()]._variantInput = {};

@@ -5,12 +5,12 @@ import Variant from './variant-model';
 // const SessionManager = require('./admin/api/util/session-manager');
 import SessionManager from './admin/api/util/session-manager';
 
-import staticState from './state/static-state';
+import staticState, { StaticState } from './state/static-state';
 
 export class Smocks {
   public _id: string;
   private _connection;
-  private _routes = [];
+  private _routes: Route[] = [];
   // private _plugins = [];
   private _variants: Record<string, Variant> = {};
   private _profiles = {};
@@ -20,7 +20,8 @@ export class Smocks {
   public input = undefined;
   public inputs = undefined;
 
-  public state = undefined;
+  // TODO sgoff0 since this is only state we used, just init smocks with it (instead of say cookie based)
+  public state = staticState;
 
   private static instance: Smocks;
   private constructor() {
@@ -38,6 +39,7 @@ export class Smocks {
   //   },
 
   //   resetInput: (request) => {
+  //     Logger.warn("TODO check on this")
   //     const state = this.state.routeState(request);
   //     const pluginState = state._pluginState = {};
   //     _.each(this._plugins, (plugin) => {
@@ -76,11 +78,12 @@ export class Smocks {
       if (!id) {
         return this._routes;
       }
-      for (let i = 0; i < this._routes.length; i++) {
-        if (this._routes[i].id() === id) {
-          return this._routes[i];
-        }
-      }
+      return _.filter(this._routes, route => route._id === id);
+      // for (let i = 0; i < this._routes.length; i++) {
+      //   if (this._routes[i].id() === id) {
+      //     return this._routes[i];
+      //   }
+      // }
     }
   }
 
@@ -129,7 +132,7 @@ export class Smocks {
       }
     },
 
-    get: (id) => {
+    get: (id?) => {
       if (!id) {
         return this._profiles;
       }
@@ -250,16 +253,17 @@ export class Smocks {
   // }
 
 
-  public getRoutes(id) {
-    if (!id) {
-      return this._routes;
-    }
-    for (let i = 0; i < this._routes.length; i++) {
-      if (this._routes[i].id() === id) {
-        return this._routes[i];
-      }
-    }
-  }
+  // public getRoutes(id) {
+  //   if (!id) {
+  //     return this._routes;
+  //   }
+  //   return _.filter(this._routes, route => route._id === id);
+  //   // for (let i = 0; i < this._routes.length; i++) {
+  //   //   if (this._routes[i].id() === id) {
+  //   //     return this._routes[i];
+  //   //   }
+  //   // }
+  // }
 
   // public getVariants(id) {
   //   if (!id) {

@@ -46,8 +46,8 @@ export default function (server: Hapi.Server, mocker) {
     handler: async (request, h) => {
       try {
         const html = await readFile(__dirname + '/config-page.html', { encoding: 'utf8' });
-        const data = {};
-        // const data = formatData(mocker, request);
+        // const data = {};
+        const data = formatData(mocker, request);
         const retVal = html.replace('{data}', JSON.stringify(data));
         // reply(html);
         return retVal;;
