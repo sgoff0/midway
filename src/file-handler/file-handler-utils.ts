@@ -52,7 +52,7 @@ class FileHandlerUtils {
 
   public setHeadersAndCookies = (response, options: FileHandlerOptions) => {
     Logger.error("This method is setting content-type on chuncked replies which causes errors");
-    console.log("Setting headers: ", options.headers);
+    // console.log("Setting headers: ", options.headers);
     const responseHeaders = this.setHeaders(response, options.headers);
     const responseCookies = this.setCookies(responseHeaders, options.cookies);
     return responseCookies;
@@ -118,7 +118,7 @@ class FileHandlerUtils {
 
   public retrieveFileDataBasedOnPayload = (payload, options) => {
     const appDir = appRoot;
-    console.log("AppDir: ", appDir);
+    // console.log("AppDir: ", appDir);
     // const appDir = global.appRoot;
     let fileData;
     if (IsValidPath(payload)) {

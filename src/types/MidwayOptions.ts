@@ -6,7 +6,7 @@ interface UserRoute {
 }
 
 export interface MidwayOptions {
-    port: number,
+    port: number | string,
     mockedDirectory: string,
     userRoute?: UserRoute[],
     startTime?: Date,

@@ -23,55 +23,13 @@ export class Smocks {
   // TODO sgoff0 since this is only state we used, just init smocks with it (instead of say cookie based)
   public state = staticState;
 
-  private static instance: Smocks;
-  private constructor() {
-  }
-  public static getInstance(): Smocks {
-    if (!Smocks.instance) {
-      Smocks.instance = new Smocks();
-    }
-    return Smocks.instance;
-  }
-
-  // public plugins = {
-  //   get: () => {
-  //     return this._plugins;
-  //   },
-
-  //   resetInput: (request) => {
-  //     Logger.warn("TODO check on this")
-  //     const state = this.state.routeState(request);
-  //     const pluginState = state._pluginState = {};
-  //     _.each(this._plugins, (plugin) => {
-  //       const input = plugin.input();
-  //       if (input) {
-  //         pluginState[plugin.id()] = {};
-  //         _.each(input, (data: any, id) => {
-  //           this.plugins.updateInput(plugin.id(), id, data.defaultValue, request);
-  //         });
-  //       }
-  //     });
-  //   },
-
-  //   updateInput: (pluginId, id, value, request) => {
-  //     const input = this.state.routeState(request)._pluginState;
-  //     let pluginInput = input[pluginId];
-  //     if (!pluginInput) {
-  //       pluginInput = {};
-  //       input[pluginId] = pluginInput;
-  //     }
-  //     pluginInput[id] = value;
-  //   },
-
-  //   getInput: (request) => {
-  //     return this.state.routeState(request)._pluginState;
-  //   },
-
-  //   getInputValue: (pluginId, id, request) => {
-  //     const input = this.state.routeState(request)._pluginState[pluginId];
-  //     return input && input[id];
+  // private static instance: Smocks;
+  // public static getInstance(): Smocks {
+  //   if (!Smocks.instance) {
+  //     Smocks.instance = new Smocks();
   //   }
-  // };
+  //   return Smocks.instance;
+  // }
 
   public routes = {
     get: (id?) => {
@@ -223,6 +181,7 @@ export class Smocks {
   }
 
   public applyProfile(profile, request) {
+    Logger.warn("Current profiles: ", this._profiles);
     if (_.isString(profile)) {
       profile = this._profiles[profile];
     }
@@ -349,4 +308,5 @@ export class Smocks {
   }
 }
 
-export default Smocks.getInstance();
+// export default Smocks.getInstance();
+export default new Smocks();

@@ -21,24 +21,24 @@ export class Midway {
 
   public server;
 
-  public profile = Smocks.profile;
+  // can't simply do public profile = Smocks.profile; b/c calling `this` from within Smocks.profile refers to Midway's this
+  public profile = (id, profile) => Smocks.profile(id, profile);
 
   public util = Utils;
   public log = Logger;
 
-  private static instance: Midway;
-  private constructor() {
-  }
+  // private static instance: Midway;
+  // private constructor() {
+  // }
 
-  public static getInstance(): Midway {
-    if (!Midway.instance) {
-      Midway.instance = new Midway();
-    }
-    return Midway.instance;
-  }
+  // public static getInstance(): Midway {
+  //   if (!Midway.instance) {
+  //     Midway.instance = new Midway();
+  //   }
+  //   return Midway.instance;
+  // }
 
-  public id = (id) => {
-
+  public id = (id?) => {
     if (!id || Smocks._id) {
       return Smocks._id;
     }
@@ -208,4 +208,5 @@ export class Midway {
   }
 
 }
-export default Midway.getInstance();
+// export default Midway.getInstance();
+export default new Midway();
