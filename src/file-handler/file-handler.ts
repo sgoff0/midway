@@ -20,32 +20,18 @@ const readFile = util.promisify(fs.readFile);
 const fileExtensionOrder = ['.json', '.html', '.txt'];
 
 export interface FileHandlerInput {
-  options: Options;
+  options: FileHandlerOptions;
   h: Hapi.ResponseToolkit;
   route: Route;
   variant: Variant;
 }
 
-interface Options {
+export interface FileHandlerOptions {
   code: number;
-  headers: Headers;
+  headers: Record<string, string>;
   filePath?: string;
-}
-
-interface Headers {
-  Date: string;
-  'Strict-Transport-Security': string;
-  'X-Powered-By': string;
-  'Cache-Control': string;
-  Pragma: string;
-  Expires: string;
-  'Site-Id': string;
-  'Set-Cookie': string;
-  'Keep-Alive': string;
-  'Content-Type': string;
-  'Content-Language': string;
-  'Transfer-Encoding': string;
-  Connection: string;
+  delay?: number;
+  cookies: any;
 }
 
 /***
@@ -87,7 +73,7 @@ export default (mockDirectoryPath: string) => {
   };
 };
 
-async function handleParsingErrorCases(err, h: Hapi.ResponseToolkit, rawFileData, data, filePath) {
+async function handleParsingErrorCases(err, h: Hapi.ResponseToolkit, rawFileData, data: FileHandlerInput, filePath) {
   Logger.warn(err.message);
 
   // Check if json syntax error
@@ -106,7 +92,7 @@ async function handleParsingErrorCases(err, h: Hapi.ResponseToolkit, rawFileData
   }
 }
 
-async function handleJsonFileWithSyntaxError(h: Hapi.ResponseToolkit, rawFileData, data, filePath) {
+async function handleJsonFileWithSyntaxError(h: Hapi.ResponseToolkit, rawFileData, data: FileHandlerInput, filePath) {
   Logger.warn('Invalid syntax in: ' + filePath + ' returning content to client anyway');
   return prepareAndSendResponse(h, rawFileData, data.options.code, data.options, FileUtils.variables.mimeTypeOfResponse);
 }
@@ -136,7 +122,7 @@ function processFileData(fileData, mimeType, data) {
   return fileData;
 }
 
-async function prepareAndSendResponse(h: Hapi.ResponseToolkit, body, code = 200, options, mimeType?): Promise<any> {
+async function prepareAndSendResponse(h: Hapi.ResponseToolkit, body, code = 200, options: FileHandlerOptions, mimeType?): Promise<any> {
   let response;
   if (mimeType) {
     // Response with specific mimeType
@@ -149,8 +135,8 @@ async function prepareAndSendResponse(h: Hapi.ResponseToolkit, body, code = 200,
     response = h.response().code(code);
   }
   Logger.warn("Skipping setting headers and cookies call");
-  // const res = FileUtils.setHeadersAndCookies(response, options);
-  return sendResponse(response, options.delay);
+  const res = FileUtils.setHeadersAndCookies(response, options);
+  return sendResponse(res, options.delay);
 }
 
 function sendResponse(response, delay) {

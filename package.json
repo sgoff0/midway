@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json && cp -r src/admin dist/admin",
     "watch": "tsc -p tsconfig.json -w",
-    "test": "jest",
+    "test": "jest --runInBand",
     "lint": "eslint . --ext .js",
     "start:dev": "nodemon ./src/resources/run-mock-server.ts",
     "start": "ts-node ./src/resources/run-mock-server.ts",

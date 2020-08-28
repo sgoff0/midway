@@ -1,5 +1,6 @@
 import { appRoot } from '../utils/pathHelpers';
 
+import * as _ from 'lodash';
 import * as Path from 'path';
 import * as MimeTypes from 'mime-types';
 import Utils from './../utils/common-utils';
@@ -7,10 +8,13 @@ import * as Logger from 'testarmada-midway-logger';
 import SessionInfo from './../session-manager/session-info';
 const MidwayUtils = require('testarmada-midway-util');
 import * as Fs from 'fs';
-import { FileHandlerInput } from './file-handler';
+import { FileHandlerInput, FileHandlerOptions } from './file-handler';
 const IsValidPath = require('is-valid-path');
 
 const fileExtensionOrder = ['.json', '.html', '.txt'];
+
+const headersToIgnore = ['Transfer-Encoding'];
+const ignoreRegex = new RegExp(headersToIgnore.join("|"), "i");
 
 class FileHandlerUtils {
   public variables = {
@@ -46,8 +50,9 @@ class FileHandlerUtils {
     this.variables.mimeTypeOfResponse = mimeType;
   };
 
-  public setHeadersAndCookies = (response, options) => {
+  public setHeadersAndCookies = (response, options: FileHandlerOptions) => {
     Logger.error("This method is setting content-type on chuncked replies which causes errors");
+    console.log("Setting headers: ", options.headers);
     const responseHeaders = this.setHeaders(response, options.headers);
     const responseCookies = this.setCookies(responseHeaders, options.cookies);
     return responseCookies;
@@ -56,8 +61,12 @@ class FileHandlerUtils {
   public setHeaders = (response, headers) => {
     if (headers !== undefined) {
       for (const key in headers) {
-        Logger.debug('Setting header: ' + key + ' to: ' + headers[key]);
-        response = response.header(key, headers[key]);
+        if (ignoreRegex.test(key)) {
+          Logger.warn(`Ignoring header ${key} as it's known to cause issues`);
+        } else {
+          Logger.debug('Setting header: ' + key + ' to: ' + headers[key]);
+          response = response.header(key, headers[key]);
+        }
       }
     }
     return response;

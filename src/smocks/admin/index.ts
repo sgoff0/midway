@@ -16,6 +16,7 @@ import * as path from 'path';
 import * as _ from 'lodash';
 import * as util from 'util';
 import { Smocks } from '..';
+import setSessionVariantStateByKey from './api/set-session-variant-state-by-key';
 const readFile = util.promisify(fs.readFile);
 
 
@@ -149,42 +150,42 @@ export default (server: Hapi.Server, smocks: Smocks) => {
     })
   });
 
-  // server.route({
-  //   method: "POST",
-  //   path: MIDWAY_API_PATH + "/sessionVariantState/reset",
-  //   handler: ensureInitialized(function (request, h, respondWithConfig) {
-  //     reply = wrapReply(request, h);
-  //     resetSessionVariantState(smocks)(request, h, respondWithConfig);
-  //   })
-  // });
+  server.route({
+    method: "POST",
+    path: MIDWAY_API_PATH + "/sessionVariantState/reset",
+    handler: ensureInitialized(function (request, h: Hapi.ResponseToolkit, respondWithConfig) {
+      // reply = wrapReply(request, h);
+      return resetSessionVariantState(smocks)(request, h, respondWithConfig);
+    })
+  });
 
-  // server.route({
-  //   method: "POST",
-  //   path: MIDWAY_API_PATH + "/sessionVariantState/reset/{key}",
-  //   handler: ensureInitialized(function (request, h, respondWithConfig) {
-  //     reply = wrapReply(request, h);
-  //     resetSessionVariantStateByKey(smocks)(request, h, respondWithConfig);
-  //   })
-  // });
+  server.route({
+    method: "POST",
+    path: MIDWAY_API_PATH + "/sessionVariantState/reset/{key}",
+    handler: ensureInitialized(function (request, h: Hapi.ResponseToolkit, respondWithConfig) {
+      // reply = wrapReply(request, h);
+      return resetSessionVariantStateByKey(smocks)(request, h, respondWithConfig);
+    })
+  });
 
-  // server.route({
-  //   method: "POST",
-  //   path: MIDWAY_API_PATH + "/sessionVariantState/set/{key}",
-  //   handler: ensureInitialized(function (request, h, respondWithConfig) {
-  //     reply = wrapReply(request, h);
-  //     resetSessionVariantStateByKey(smocks)(request, h, respondWithConfig);
-  //   })
-  // });
+  server.route({
+    method: "POST",
+    path: MIDWAY_API_PATH + "/sessionVariantState/set/{key}",
+    handler: ensureInitialized(function (request, h: Hapi.ResponseToolkit, respondWithConfig) {
+      // reply = wrapReply(request, h);
+      return setSessionVariantStateByKey(smocks)(request, h, respondWithConfig);
+    })
+  });
 
 
-  // server.route({
-  //   method: 'POST',
-  //   path: MIDWAY_API_PATH + '/input/reset',
-  //   handler: ensureInitialized(function (request, h, respondWithConfig) {
-  //     reply = wrapReply(request, h);
-  //     ResetInput(smocks)(request, h, respondWithConfig);
-  //   })
-  // });
+  server.route({
+    method: 'POST',
+    path: MIDWAY_API_PATH + '/input/reset',
+    handler: ensureInitialized(function (request, h: Hapi.ResponseToolkit, respondWithConfig) {
+      // reply = wrapReply(request, h);
+      return ResetInput(smocks)(request, h, respondWithConfig);
+    })
+  });
 
   // server.route({
   //   method: 'POST',

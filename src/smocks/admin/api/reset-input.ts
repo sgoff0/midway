@@ -1,10 +1,11 @@
 const _ = require('lodash');
 import formatData from './format-data';
 import { Smocks } from '../..';
+import * as Hapi from '@hapi/hapi';
 
 export default function (mocker: Smocks) {
 
-  return function (request, reply, respondWithConfig) {
+  return function (request, h: Hapi.ResponseToolkit, respondWithConfig) {
     mocker.state.resetRouteState(request);
 
     _.each(mocker.routes.get(), function (route) {
@@ -13,6 +14,6 @@ export default function (mocker: Smocks) {
     });
     // mocker.plugins.resetInput(request);
 
-    reply(respondWithConfig ? formatData(mocker, request) : {});
+    return h.response(respondWithConfig ? formatData(mocker, request) : {});
   };
 };

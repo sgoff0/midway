@@ -224,7 +224,7 @@ class Route {
   }
 
 
-  public getActiveVariant = (request) => {
+  public getActiveVariant = (request: Hapi.Request) => {
     const id = this.activeVariant(request);
     return _.find(this.variants(), (variant) => {
       return variant.id() === id;
@@ -250,7 +250,7 @@ class Route {
     return variant.respondWithFile(options);
   }
 
-  public activeVariant = (request) => {
+  public activeVariant = (request: Hapi.Request) => {
     const variantFromRequestHeader = request.headers['x-request-variant'];
     const variantFromRouteState = this._mocker.state.routeState(request)[this._id]._activeVariant;
 

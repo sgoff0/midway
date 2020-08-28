@@ -2,9 +2,14 @@ import * as Hapi from '@hapi/hapi';
 import * as Logger from 'testarmada-midway-logger';
 export class StaticState {
   public doInitialize = true;
-  public ROUTE_STATE = {};
+  public ROUTE_STATE: Record<string, any> = {};
+
+  // Don't believe user state is used anywhere
   public USER_STATE = {};
-  public SESSION_VARIANT_STATE = {};
+
+  public SESSION_VARIANT_STATE: Record<string, Record<string, string>> = {
+    // "a": { "b": "c" },
+  };
 
   public initialize = (request) => {
     Logger.debug("Static State Initialize");
@@ -43,7 +48,7 @@ export class StaticState {
     delete this.SESSION_VARIANT_STATE[key];
   }
 
-  public setSessionVariantStateByKey = (request, key, payload) => {
+  public setSessionVariantStateByKey = (request, key: string, payload: Record<string, string>) => {
     this.SESSION_VARIANT_STATE[key] = payload;
   }
 

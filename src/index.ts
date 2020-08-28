@@ -29,6 +29,7 @@ export class Midway {
   private static instance: Midway;
   private constructor() {
   }
+
   public static getInstance(): Midway {
     if (!Midway.instance) {
       Midway.instance = new Midway();
@@ -69,10 +70,10 @@ export class Midway {
 
   }
 
-  public stop = (server: Hapi.Server) => {
+  public stop = async (server: Hapi.Server) => {
     Logger.debug('***************Stopping Midway mocking server ***************');
     const serverToStop = server || this.server;
-    MidwayServer.stop(serverToStop);
+    return MidwayServer.stop(serverToStop);
   }
 
   public toPlugin = (hapiPluginOptions, options) => {
