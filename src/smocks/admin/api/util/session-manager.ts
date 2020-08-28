@@ -1,5 +1,3 @@
-export { };
-
 class SmocksSessionManager {
   private midwaySessions = {};
   private DEFAULT_SESSION = 'default';

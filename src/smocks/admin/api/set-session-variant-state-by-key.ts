@@ -1,7 +1,7 @@
-export { };
 import formatData from './format-data';
+import { Smocks } from '../..';
 
-module.exports = function (mocker) {
+export default function (mocker: Smocks) {
   return function (request, reply, respondWithConfig) {
     const key = request.params.key;
     const payload = request.payload;
