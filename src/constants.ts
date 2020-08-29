@@ -1,6 +1,6 @@
 export default {
   MIDWAY_API_PATH: '/midway/api',
-  MIDWAY_DEFAULT_MOCKED_DATA_LOC: 'resources/mocked-data',
+  MIDWAY_DEFAULT_MOCKED_DATA_LOC: 'src/resources/mocked-data',
   MIDWAY_PRIVATE_KEY_FILE: 'key.pem',
   MIDWAY_CERTIFICATE_FILE: 'cert.pem',
   MIDWAY_CERT_FOLDER_NAME: '.certs',
