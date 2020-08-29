@@ -104,7 +104,7 @@ class FilePathController {
     return await FileUtils.selectFileFromDirectory(Path.join(base, path, routeMethod), (variant.id && variant.id()) || variant);
   };
 
-  public getDefaultFileName = (data: FileHandlerInput) => {
+  public getDefaultFileName = (data) => {
     // Get the filename for the url to respond
     const fileFromPath = Utils.getPathWithoutSessionIdFromData(data).replace(/\//g, '-');
     let defaultFileName = fileFromPath.indexOf('-') === 0 ? fileFromPath.substring(1) : fileFromPath;
