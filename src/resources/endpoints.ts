@@ -438,23 +438,19 @@ midway.route({
     handler: function (req, h: Hapi.ResponseToolkit) {
         return midway.util.respondWithFile(this, h);
     }
-})
-
-    .variant({
-        id: 'image-respondWithFile',
-        label: 'RespondWithFile-Image',
-        handler: function (req, h: Hapi.ResponseToolkit) {
-            return midway.util.respondWithFile(this, h);
-        }
-    })
-
-    .variant({
-        id: 'image-filepath',
-        label: 'Image-Filepath',
-        handler: function (req, h: Hapi.ResponseToolkit) {
-            return midway.util.respondWithFile(this, h, { filePath: './api/testImage/filePath-image-test.jpeg' });
-        }
-    });
+}).variant({
+    id: 'image-respondWithFile',
+    label: 'RespondWithFile-Image',
+    handler: function (req, h: Hapi.ResponseToolkit) {
+        return midway.util.respondWithFile(this, h);
+    }
+}).variant({
+    id: 'image-filepath',
+    label: 'Image-Filepath',
+    handler: function (req, h: Hapi.ResponseToolkit) {
+        return midway.util.respondWithFile(this, h, { filePath: './api/testImage/filePath-image-test.jpeg' });
+    }
+});
 
 // Route for returning a POST call
 midway.route({
