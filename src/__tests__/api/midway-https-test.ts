@@ -5,9 +5,10 @@ import { appRoot, resourcesPath } from '../../utils/pathHelpers';
 import * as util from 'util';
 import * as Hapi from '@hapi/hapi';
 
-const setMockVariant = util.promisify(midway.setMockVariant);
+// const setMockVariant = util.promisify(midway.setMockVariant);
 const mockedDirectory = path.join(resourcesPath, 'upgrade-mocked-data');
-require(mockedDirectory);
+// require(mockedDirectory);
+import '../../resources/upgrade-mocked-data';
 
 describe('Midway Server', function () {
   let myServer: Hapi.Server;
@@ -42,7 +43,7 @@ describe('Midway Server', function () {
     // console.log("URl count: ", midway.getURLCount());
     const result = await request.post('/portal');
     expect(result.status).toBe(200);
-    await setMockVariant({
+    await midway.setMockVariant({
       mockPort: 3000,
       fixture: 'POST /portal',
       variant: 'Bank-OOB',

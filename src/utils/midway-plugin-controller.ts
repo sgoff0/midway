@@ -9,10 +9,9 @@ import { MidwayOptions } from '../types/MidwayOptions';
 
 
 export default {
-  // runHapiWithPlugins: async function (server: Hapi.Server, midwayOptions) {
   runHapiWithPlugins: async function (server, midwayOptions: MidwayOptions) {
     // Smocks plugin
-    Logger.info("Midway options: ", midwayOptions);
+    // Logger.info("Midway options: ", midwayOptions);
     server.midwayOptions = midwayOptions;
     await registerMidwayPlugin(server);
   }

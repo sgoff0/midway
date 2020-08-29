@@ -19,7 +19,7 @@ let kairosDbUrl;
 import * as util from 'util';
 import * as fs from 'fs';
 import Route from '../smocks/route-model';
-import { Midway } from '../index';
+import { Midway, MockVariantOptions } from '../index';
 const readFile = util.promisify(fs.readFile);
 const readDir = util.promisify(fs.readdir);
 const exists = util.promisify(fs.exists);
@@ -67,7 +67,7 @@ export class CommonUtils {
   /**
    *  Called by user defined/charles generated routes in midway.utils.respondWithFile
    */
-  public respondWithFile = async (route, h: Hapi.ResponseToolkit, options: FileHandlerOptions) => {
+  public respondWithFile = async (route, h: Hapi.ResponseToolkit, options: FileHandlerOptions = {}) => {
     // if (!this.urlCalls) {
     //   this.urlCalls = {};
     // }
@@ -315,18 +315,18 @@ export class CommonUtils {
   }
 
   // TODO sgoff0 finish refactoring
-  public setMockVariant = async (options, callback) => {
+  public setMockVariant = async (options: MockVariantOptions) => {
 
     if (!options.mockPort) {
-      return callback(new Error('Missing mockPort in options'));
+      throw new Error('Missing mockPort in options');
     }
 
     if (!options.variant) {
-      return callback(new Error('Missing variant in options'));
+      throw new Error('Missing variant in options');
     }
 
     if (!options.fixture) {
-      return callback(new Error('Missing fixture in options'));
+      throw new Error('Missing fixture in options');
     }
 
     // SetMockVariant is a handy method to get a variant of a route which should be already defined in the endpoints.js
@@ -344,21 +344,15 @@ export class CommonUtils {
       url: url
     };
 
-    return await Rp(requestOptions).then(function () {
+    try {
+      const response = await Rp(requestOptions);
+      Logger.debug("SetMockVariant Response: ", response);
       Logger.debug('SetMockVariant POST Call is successful: ', requestOptions);
-      if (callback) {
-        return callback(null, options);
-      }
-    }, function (err) {
+      return options;
+    } catch (err) {
       Logger.error('SetMockVariant POST Call Not successful with options: ', requestOptions, err.message);
-      if (callback) {
-        return callback(err, 'failed');
-      }
-    }).catch(function (err) {
-      if (callback) {
-        return callback(err);
-      }
-    });
+      throw new Error(err);
+    }
   }
 
   public resetMockId = (sessionId) => {

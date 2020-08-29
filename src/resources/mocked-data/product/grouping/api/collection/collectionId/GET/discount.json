@@ -1,0 +1,9 @@
+{
+  "collection": {
+    "sectionOne": {
+      "type": "discount",
+      "minRequired": 0,
+      "stepNumber": 0
+    }
+  }
+}

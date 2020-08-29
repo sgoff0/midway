@@ -1,0 +1,9 @@
+{
+  "collection": {
+    "sectionOne": {
+      "type": "variant with delay",
+      "minRequired": 0,
+      "stepNumber": 0
+    }
+  }
+}

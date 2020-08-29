@@ -27,11 +27,13 @@ export interface FileHandlerInput {
 }
 
 export interface FileHandlerOptions {
-  code: number;
-  headers?: Record<string, string>;
+  code?: number;
+  headers?: Record<string, string | boolean>;
   filePath?: string;
   delay?: number;
   cookies?: any;
+  // TODO 
+  transpose?: any;
 }
 
 /***
@@ -134,7 +136,6 @@ async function prepareAndSendResponse(h: Hapi.ResponseToolkit, body, code = 200,
     // Empty body response mostly 404
     response = h.response().code(code);
   }
-  Logger.warn("Skipping setting headers and cookies call");
   const res = FileUtils.setHeadersAndCookies(response, options);
   return sendResponse(res, options.delay);
 }

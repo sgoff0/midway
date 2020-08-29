@@ -42,8 +42,6 @@ class ServerController {
     }
 
     const server = createHapiServer(midwayOptions);
-    Logger.warn("Confirm add server routes is working");
-    // this.addServerRoutesAndSessions(midwayOptions, server);
     this.addServerRoutesAndSessions(midwayOptions);
 
     Logger.debug("Init ReadMockDataFromFile");
@@ -60,7 +58,7 @@ class ServerController {
       await server.stop();
       Logger.debug('Midway server stopped');
     } catch (e) {
-      Logger.error("Error stopping server");
+      Logger.error("Error stopping server", e);
     }
   };
 

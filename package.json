@@ -17,7 +17,6 @@
     "start:dev": "nodemon ./src/resources/run-mock-server.ts",
     "start": "ts-node ./src/resources/run-mock-server.ts",
     "start:dist": "node ./dist/resources/run-mock-server.js",
-    "debug": "ts-node --debug-brk ./resources/run-mock-server-console-caribou-node.js",
     "prettier:check": "prettier --list-different '**/*.{ts,json}'",
     "prettier:fix": "prettier --write '**/*.{ts,js,json}'",
     "eslint:check": "eslint . --ext .ts",

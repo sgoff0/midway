@@ -17,6 +17,13 @@ import { MidwayOptions } from './types/MidwayOptions';
 const userRoutes = [];
 const globalVariants = [];
 
+export interface MockVariantOptions {
+  mockPort?: number,
+  fixture: string,
+  variant: string,
+  midwaySessionId?: string,
+}
+
 export class Midway {
 
   public server;
@@ -70,7 +77,7 @@ export class Midway {
 
   }
 
-  public stop = async (server: Hapi.Server) => {
+  public stop = async (server?: Hapi.Server) => {
     Logger.debug('***************Stopping Midway mocking server ***************');
     const serverToStop = server || this.server;
     return MidwayServer.stop(serverToStop);
@@ -114,7 +121,7 @@ export class Midway {
     return Smocks.routes.get(routeId);
   }
 
-  public setMockId = (mockId, sessionId) => {
+  public setMockId = (mockId, sessionId?) => {
     return Utils.setMockId(mockId, sessionId);
   }
 
@@ -122,7 +129,7 @@ export class Midway {
     return Utils.getMockId(sessionId);
   }
 
-  public resetMockId = (sessionId) => {
+  public resetMockId = (sessionId?) => {
     return Utils.resetMockId(sessionId);
   }
 
@@ -147,23 +154,18 @@ export class Midway {
   //   });
   // }
 
-  public setMockVariant = (options, callback) => {
+  public setMockVariant = async (options: MockVariantOptions) => {
     if (!options.mockPort) {
       options.mockPort = this.getPortInfo().httpPort;
     }
-    Utils.setMockVariant(options, (err, result) => {
-      if (err) {
-        return callback(err);
-      }
-      return callback(null, result);
-    });
+    return await Utils.setMockVariant(options);
   }
 
-  public resetURLCount = (sessionId) => {
+  public resetURLCount = (sessionId?) => {
     return Utils.resetURLCount(sessionId);
   }
 
-  public getURLCount = (sessionId) => {
+  public getURLCount = (sessionId?) => {
     return Utils.getURLCount(sessionId);
   }
 
@@ -203,7 +205,7 @@ export class Midway {
     return StateManager.getState(route, stateKey);
   }
 
-  public clearState = (sessionId) => {
+  public clearState = (sessionId?) => {
     StateManager.clearState(sessionId);
   }
 

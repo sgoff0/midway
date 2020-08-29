@@ -1,0 +1,9 @@
+{
+  "collection": {
+    "sectionOne": {
+      "type": "universe",
+      "minRequired": 0,
+      "stepNumber": 0
+    }
+  }
+}

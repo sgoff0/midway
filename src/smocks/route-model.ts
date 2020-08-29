@@ -17,7 +17,7 @@ export interface RouteData {
   // Path of the route
   path: string,
   // HTTP Method
-  method: string,
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'OPTIONS',
   // Function which handles the request for the path (Hapi handler function)
   handler: (request: Hapi.Request, h: Hapi.ResponseToolkit) => Hapi.Lifecycle.ReturnValue,
   // Displayed in admin UI instead of the variant id (e.g. instead of default or some-variant)
@@ -381,8 +381,6 @@ class Route {
 
   public selectedVariantInput = (variant: Variant, request: Hapi.Request) => {
     const smocksState = this._mocker.state;
-    // TODO sgoff0 first read files
-    Logger.warn("Routes not yet loaded from file, make sure they are being read then this may work");
     const smocksRouteState = smocksState.routeState(request);
     const routeIdState = smocksRouteState[this._id];
     let input = routeIdState?._variantInput;
