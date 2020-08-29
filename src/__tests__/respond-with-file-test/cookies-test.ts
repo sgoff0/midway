@@ -1,4 +1,3 @@
-import midway from '../../index';
 import * as SuperTestRequest from 'supertest';
 
 import { getTestServer, getSuperTest, stopTestServer } from '../testHelper';
