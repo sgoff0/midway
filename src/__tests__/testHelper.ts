@@ -13,6 +13,8 @@ import * as Hapi from '@hapi/hapi';
 //         }
 //     }
 // }
+// process.env.MIDWAY_LOG_LEVEL = 'error';
+
 export const getHTTPPort = () => 3000;
 
 export const getTestServer = async (): Promise<Hapi.Server> => {
@@ -30,6 +32,17 @@ export const stopTestServer = async (server?) => {
 export const getSuperTest = () => {
     return SuperTestRequest('http://localhost:3000');
 };
+
+const OLD_ENV = process.env;
+
+beforeEach(() => {
+    // TODO not sure this is working
+    jest.resetAllMocks();// clears cache
+    process.env.MIDWAY_LOG_LEVEL = 'error';
+});
+afterAll(() => {
+    process.env = OLD_ENV;
+});
 
 /*
 // let request: SuperTestRequest.SuperTest<SuperTestRequest.Test>;

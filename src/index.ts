@@ -13,6 +13,7 @@ import * as Logger from 'testarmada-midway-logger';
 import * as Hapi from '@hapi/hapi';
 import { RouteData } from './smocks/route-model';
 import { MidwayOptions } from './types/MidwayOptions';
+import { constant } from 'lodash';
 
 const userRoutes = [];
 const globalVariants = [];
@@ -53,7 +54,9 @@ export class Midway {
     return Smocks;
   }
 
-  public start = async (midwayOptions: MidwayOptions): Promise<Hapi.Server> => {
+  public start = async (midwayOptions: MidwayOptions = {
+    port: 8000,
+  }): Promise<Hapi.Server> => {
     Logger.debug('***************Starting Midway mocking server ***************');
     // RepoUtil.handleMultipleRepos(midwayOptions).then(() => {
     //   midwayOptions.userRoutes = userRoutes;

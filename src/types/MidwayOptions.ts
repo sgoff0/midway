@@ -7,7 +7,7 @@ interface UserRoute {
 
 export interface MidwayOptions {
     port: number | string,
-    mockedDirectory: string,
+    mockedDirectory?: string,
     userRoute?: UserRoute[],
     startTime?: Date,
     httpsPort?: number | void,
