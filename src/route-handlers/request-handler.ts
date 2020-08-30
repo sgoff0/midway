@@ -6,12 +6,12 @@ import * as Hapi from '@hapi/hapi';
 const RequestHandler = (request, h: Hapi.ResponseToolkit) => {
   // Route all requests to sessions if server is running with sessions
 
-  function prependSessionId(url, sessionId) {
-    if (sessionId && !url.startsWith('/' + sessionId)) {
-      url = '/' + sessionId + url;
-    }
-    return url;
-  }
+  // function prependSessionId(url, sessionId): string {
+  //   if (sessionId && !url.startsWith('/' + sessionId)) {
+  //     url = '/' + sessionId + url;
+  //   }
+  //   return url;
+  // }
 
   function getSessionIdFromQuery() {
     return request.query && request.query.midwaySessionId;

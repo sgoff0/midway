@@ -23,7 +23,6 @@ describe('set-mock-id-code-test', () => {
 
         const result2 = await request.get('/message')
             .expect('Content-type', /json/);
-        console.log('Resp: ', result2.body);
         expect(result2.body.collection.sectionOne.type).toBe('universe');
     });
 
