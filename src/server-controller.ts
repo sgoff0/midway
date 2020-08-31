@@ -52,14 +52,15 @@ class ServerController {
     return server;
   };
 
-  public stop = async (server: Hapi.Server) => {
+  public stop = async (server: Hapi.Server): Promise<void> => {
     MidwayUtils.setServerRunningStatus(false);
     try {
-      await server.stop();
+      return await server.stop();
       Logger.debug('Midway server stopped');
     } catch (e) {
       Logger.error("Error stopping server", e);
     }
+    return;
   };
 
   public addServerRoutesAndSessions = (midwayOptions: MidwayOptions) => {

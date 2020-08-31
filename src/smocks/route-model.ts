@@ -36,7 +36,7 @@ export interface RouteData {
   meta?: any,
 }
 
-class Route {
+export class Route {
   private _mocker: Smocks;
   private _label: string;
   public _path: string;

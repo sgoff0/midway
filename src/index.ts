@@ -1,6 +1,5 @@
 
 import MidwayServer from './server-controller';
-import Plugin from './plugin';
 import Utils from './utils/common-utils';
 import SessionManager from './session-manager/session-manager';
 import StateManager from './state-manager/state-manager';
@@ -11,7 +10,7 @@ import Constants from './constants';
 import Smocks from './smocks/index';
 import * as Logger from 'testarmada-midway-logger';
 import * as Hapi from '@hapi/hapi';
-import { RouteData } from './smocks/route-model';
+import { Route, RouteData } from './smocks/route-model';
 import { MidwayOptions } from './types/MidwayOptions';
 
 const userRoutes = [];
@@ -68,19 +67,19 @@ export class Midway {
 
   }
 
-  public stop = async (server?: Hapi.Server) => {
+  public stop = async (server?: Hapi.Server): Promise<void> => {
     Logger.debug('***************Stopping Midway mocking server ***************');
     const serverToStop = server || this.server;
-    return MidwayServer.stop(serverToStop);
+    return await MidwayServer.stop(serverToStop);
   }
 
-  public toPlugin = (hapiPluginOptions, options) => {
-    const smocksOptions = options || {};
-    smocksOptions.userRoutes = userRoutes;
-    return Plugin.toPlugin(hapiPluginOptions, smocksOptions);
-  }
+  // public toPlugin = (hapiPluginOptions, options) => {
+  //   const smocksOptions = options || {};
+  //   smocksOptions.userRoutes = userRoutes;
+  //   return Plugin.toPlugin(hapiPluginOptions, smocksOptions);
+  // }
 
-  public route = (data: RouteData) => {
+  public route = (data: RouteData): Route => {
     Logger.debug('Routes.....');
     Logger.debug(JSON.stringify(data, null, 2));
 
