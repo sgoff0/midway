@@ -239,6 +239,10 @@ export class Smocks {
   //   return this;
   // },
 
+  public resetRoutes() {
+    this._routes = [];
+  }
+
   public findRoute(id) {
     return _.find(this._routes, (route) => {
       return route._id === id;

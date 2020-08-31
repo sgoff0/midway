@@ -13,7 +13,6 @@ import * as Logger from 'testarmada-midway-logger';
 import * as Hapi from '@hapi/hapi';
 import { RouteData } from './smocks/route-model';
 import { MidwayOptions } from './types/MidwayOptions';
-import { constant } from 'lodash';
 
 const userRoutes = [];
 const globalVariants = [];
@@ -34,17 +33,6 @@ export class Midway {
 
   public util = Utils;
   public log = Logger;
-
-  // private static instance: Midway;
-  // private constructor() {
-  // }
-
-  // public static getInstance(): Midway {
-  //   if (!Midway.instance) {
-  //     Midway.instance = new Midway();
-  //   }
-  //   return Midway.instance;
-  // }
 
   public id = (id?) => {
     if (!id || Smocks._id) {
@@ -134,6 +122,14 @@ export class Midway {
 
   public resetMockId = (sessionId?) => {
     return Utils.resetMockId(sessionId);
+  }
+
+  public resetAll = () => {
+    this.resetURLCount();
+    this.clearSessions();
+    this.clearState();
+    Smocks.resetRoutes();
+
   }
 
   public resetMockVariantWithSession = Utils.resetMockVariantWithSession;
